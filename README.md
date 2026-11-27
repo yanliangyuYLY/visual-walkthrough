@@ -1,5 +1,9 @@
 # Visual Walkthrough
 
+[![Visual Walkthrough 宣传视频](./assets/demo-poster.jpg)](./assets/visual-walkthrough-demo.mp4)
+
+> 🎬 [点击观看完整宣传视频（1080p · 含 BGM）](./assets/visual-walkthrough-demo.mp4)
+
 作者：`a` · 版本：`2.0.0` · 协议：[MIT License](./LICENSE)
 
 **Visual Walkthrough** 是一个符合 Google / Gemini Antigravity 官方插件架构与安全规范的跨平台混合一体插件，聚焦研发高频协作场景，在对话内联与侧栏工作台中提供三类高交互可视化内容：
