@@ -199,6 +199,7 @@ function createFileRefElement(
   fileUri?: string,
   lineStart?: number,
   lineEnd?: number,
+  bare = false,
 ): HTMLElement | null {
   const label = fileRef
     ? lineStart && !fileRef.includes(":")
@@ -210,12 +211,14 @@ function createFileRefElement(
 
   if (!label) return null;
 
+  const displayText = bare ? label : `(${label})`;
+
   if (isValidFileUri(fileUri)) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "vw-file-link";
     btn.title = "在侧栏打开源文件";
-    btn.textContent = `(${label})`;
+    btn.textContent = displayText;
     btn.addEventListener("click", () => {
       void openFileInAuxPane(fileUri);
     });
@@ -224,7 +227,7 @@ function createFileRefElement(
 
   const span = document.createElement("span");
   span.className = "vw-file-static";
-  span.textContent = `(${label})`;
+  span.textContent = displayText;
   return span;
 }
 
@@ -556,9 +559,9 @@ function renderCellContent(cell: CellValue): HTMLElement {
   }
 
   if ("fileRef" in cell) {
-    const link = createFileRefElement(cell.fileRef, cell.fileUri);
+    const link = createFileRefElement(cell.fileRef, cell.fileUri, undefined, undefined, true);
     if (link) {
-      if (link.classList.contains("vw-file-link")) {
+      if (link.classList.contains("vw-file-link") || link.classList.contains("vw-file-static")) {
         link.style.marginLeft = "0";
       }
       wrap.appendChild(link);
@@ -569,6 +572,50 @@ function renderCellContent(cell: CellValue): HTMLElement {
   return wrap;
 }
 
+function measureDisplayLen(text: string): number {
+  let len = 0;
+  for (const ch of text) {
+    len += ch.charCodeAt(0) > 127 ? 2 : 1;
+  }
+  return len;
+}
+
+function classifyTableColumns(
+  columns: string[],
+  rows: CellValue[][],
+): string[] {
+  return columns.map((colHeader, colIdx) => {
+    const colCells = rows.map((row) => row[colIdx]).filter((c) => c !== undefined && c !== "");
+    if (colCells.length === 0) return "";
+
+    const allBadge = colCells.every((c) => typeof c === "object" && "badge" in c);
+    if (allBadge) return "vw-col-badge";
+
+    const allFile = colCells.every((c) => typeof c === "object" && "fileRef" in c);
+    if (allFile) return "vw-col-file";
+
+    const allCode = colCells.every((c) => typeof c === "object" && "code" in c);
+    if (allCode) return "vw-col-code";
+
+    let maxLen = measureDisplayLen(colHeader);
+    for (const c of colCells) {
+      if (typeof c === "string") {
+        maxLen = Math.max(maxLen, measureDisplayLen(c));
+      } else if ("code" in c) {
+        maxLen = Math.max(maxLen, measureDisplayLen(c.code));
+      } else if ("badge" in c) {
+        maxLen = Math.max(maxLen, measureDisplayLen(c.badge) + 4);
+      } else if ("fileRef" in c) {
+        maxLen = Math.max(maxLen, measureDisplayLen(c.fileRef));
+      }
+    }
+
+    if (maxLen <= 14) return "vw-col-compact";
+    if (maxLen >= 28) return "vw-col-wide";
+    return "";
+  });
+}
+
 function buildTableBlock(block: Extract<UiBlock, { type: "table" }>): HTMLElement {
   const wrap = document.createElement("div");
   wrap.className = "vw-table-wrap";
@@ -576,13 +623,16 @@ function buildTableBlock(block: Extract<UiBlock, { type: "table" }>): HTMLElemen
   const table = document.createElement("table");
   table.className = "vw-table";
 
+  const colClasses = classifyTableColumns(block.columns, block.rows);
+
   const thead = document.createElement("thead");
   const headTr = document.createElement("tr");
-  for (const col of block.columns) {
+  block.columns.forEach((col, i) => {
     const th = document.createElement("th");
+    if (colClasses[i]) th.className = colClasses[i];
     th.textContent = col;
     headTr.appendChild(th);
-  }
+  });
   thead.appendChild(headTr);
 
   const tbody = document.createElement("tbody");
@@ -590,6 +640,7 @@ function buildTableBlock(block: Extract<UiBlock, { type: "table" }>): HTMLElemen
     const tr = document.createElement("tr");
     for (let i = 0; i < block.columns.length; i++) {
       const td = document.createElement("td");
+      if (colClasses[i]) td.className = colClasses[i];
       const cell = row[i] ?? "";
       td.appendChild(renderCellContent(cell));
       tr.appendChild(td);
