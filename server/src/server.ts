@@ -1,4 +1,5 @@
 // Author: a
+import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,291 +10,101 @@ import {
   registerAppResource,
   registerAppTool,
 } from "@modelcontextprotocol/ext-apps/server";
-import { z } from "zod";
+import {
+  AppGetCardInputShape,
+  AppSaveDraftInputShape,
+  OptionalWalkthroughInputShape,
+  UiCardInputShape,
+  WalkthroughInputShape,
+} from "./schema";
+import { enforceUiCardBudget, enforceWalkthroughBudget } from "./budget";
+import { DEFAULT_DEMO_PAYLOAD, MINI_GALLERY, findGalleryPayload } from "./gallery";
+import { PluginStorage, parseDataDirArg } from "./storage";
+import type {
+  CodeBlock,
+  LeafUiBlock,
+  MermaidNodeDetail,
+  NormalizedUiCard,
+  NormalizedWalkthrough,
+  StepItem,
+  StoredPayload,
+  UiBlock,
+} from "./shared/types";
 
 const APP_URI = "ui://visual-walkthrough/app.html";
-const MAX_PAYLOAD_BYTES = 750 * 1024; // 留足余量，避免触发 1 MiB 轨迹上限
+const PLUGIN_VERSION = "2.0.0";
 
-const StepItemSchema = z.object({
-  number: z.number().int().positive().optional(),
-  title: z.string().min(1),
-  description: z.string().min(1),
-  fileRef: z.string().optional(),
-  fileUri: z.string().optional(),
-  lineStart: z.number().int().positive().optional(),
-  lineEnd: z.number().int().positive().optional(),
-});
+const storage = new PluginStorage(parseDataDirArg(process.argv.slice(2)));
 
-const CodeBlockSchema = z.object({
-  title: z.string().min(1),
-  fileRef: z.string().optional(),
-  fileUri: z.string().optional(),
-  language: z.string().optional(),
-  startLine: z.number().int().positive().optional(),
-  code: z.string(),
-  defaultOpen: z.boolean().optional(),
-});
+function createCardId(prefix: "wt" | "card"): string {
+  const short = crypto.randomBytes(4).toString("hex");
+  return `${prefix}-${Date.now().toString(36)}-${short}`;
+}
 
-const CellBadgeSchema = z.object({
-  badge: z.string().min(1),
-  tone: z.enum(["good", "warn", "bad", "info", "neutral"]).optional(),
-});
+function normalizeLeafBlock(block: LeafUiBlock, codeCounter: { count: number }): LeafUiBlock {
+  if (block.type === "steps") {
+    return {
+      ...block,
+      items: block.items.map((item, idx) => ({
+        ...item,
+        number: item.number ?? idx + 1,
+      })),
+    };
+  }
+  if (block.type === "code") {
+    const defaultOpen = block.defaultOpen ?? codeCounter.count === 0;
+    codeCounter.count += 1;
+    return {
+      ...block,
+      startLine: block.startLine ?? 1,
+      defaultOpen,
+    };
+  }
+  if (block.type === "mermaid") {
+    return {
+      ...block,
+      code: block.code.trim(),
+    };
+  }
+  if (block.type === "diff") {
+    return {
+      ...block,
+      patch: block.patch.replace(/\r\n/g, "\n"),
+      defaultOpen: block.defaultOpen ?? true,
+    };
+  }
+  if (block.type === "findings") {
+    return {
+      ...block,
+      items: block.items.map((item, idx) => ({
+        ...item,
+        id: item.id ?? `finding-${idx + 1}`,
+      })),
+    };
+  }
+  if (block.type === "plan") {
+    return {
+      ...block,
+      steps: block.steps.map((step, idx) => ({
+        ...step,
+        id: step.id ?? `step-${idx + 1}`,
+        defaultChecked: step.defaultChecked ?? !step.optional,
+      })),
+    };
+  }
+  return block;
+}
 
-const CellCodeSchema = z.object({
-  code: z.string(),
-});
-
-const CellFileSchema = z.object({
-  fileRef: z.string().min(1),
-  fileUri: z.string().optional(),
-});
-
-const CellSchema = z.union([
-  z.string(),
-  CellBadgeSchema,
-  CellCodeSchema,
-  CellFileSchema,
-]);
-
-const ActionButtonSchema = z.object({
-  label: z.string().min(1),
-  variant: z.enum(["primary", "secondary", "danger"]).optional(),
-  action: z.discriminatedUnion("type", [
-    z.object({ type: z.literal("send"), text: z.string().min(1) }),
-    z.object({ type: z.literal("copy"), text: z.string().min(1) }),
-    z.object({ type: z.literal("open_file"), fileUri: z.string().min(1) }),
-  ]),
-});
-
-const BlockSchema = z.discriminatedUnion("type", [
-  z.object({
-    type: z.literal("table"),
-    columns: z.array(z.string()).min(1),
-    rows: z.array(z.array(CellSchema)),
-  }),
-  z.object({
-    type: z.literal("callout"),
-    title: z.string().optional(),
-    text: z.string().min(1),
-    tone: z.enum(["good", "info", "warn", "bad"]).optional(),
-  }),
-  z.object({
-    type: z.literal("mermaid"),
-    code: z.string().min(1),
-  }),
-  z.object({
-    type: z.literal("steps"),
-    items: z.array(StepItemSchema).min(1),
-  }),
-  z.object({
-    type: z.literal("code"),
-    title: z.string().min(1),
-    fileRef: z.string().optional(),
-    fileUri: z.string().optional(),
-    language: z.string().optional(),
-    startLine: z.number().int().positive().optional(),
-    code: z.string(),
-    defaultOpen: z.boolean().optional(),
-  }),
-  z.object({
-    type: z.literal("text"),
-    content: z.string().min(1),
-  }),
-  z.object({
-    type: z.literal("actions"),
-    buttons: z.array(ActionButtonSchema).min(1),
-  }),
-]);
-
-const WalkthroughInputShape = {
-  title: z.string().min(1).describe("逻辑讲解卡片标题"),
-  subtitle: z.string().optional().describe("可选副标题或入口模块说明"),
-  mermaid: z.string().optional().describe("可选 Mermaid 流程图代码（推荐 flowchart LR 或 TD）"),
-  steps: z.array(StepItemSchema).optional().describe("分步逻辑拆解列表"),
-  codeBlocks: z.array(CodeBlockSchema).optional().describe("可折叠源码片段列表"),
-  notes: z.array(z.string()).optional().describe("可选补充说明或注意事项"),
-};
-
-const UiCardInputShape = {
-  title: z.string().min(1).describe("交互卡片标题"),
-  subtitle: z.string().optional().describe("可选副标题"),
-  blocks: z.array(BlockSchema).min(1).describe("按顺序渲染的声明式组件块列表"),
-};
-
-const OptionalWalkthroughInputShape = {
-  title: z.string().min(1).optional().describe("可选卡片标题，不传时复用最近一次或展示示例"),
-  subtitle: z.string().optional(),
-  mermaid: z.string().optional(),
-  steps: z.array(StepItemSchema).optional(),
-  codeBlocks: z.array(CodeBlockSchema).optional(),
-  notes: z.array(z.string()).optional(),
-};
-
-type StepItem = z.infer<typeof StepItemSchema>;
-type CodeBlock = z.infer<typeof CodeBlockSchema>;
-type UiBlock = z.infer<typeof BlockSchema>;
-
-export interface NormalizedWalkthrough {
-  [key: string]: unknown;
-  kind: "walkthrough";
+export function normalizeWalkthrough(input: {
   title: string;
   subtitle?: string;
   mermaid?: string;
-  steps: Array<StepItem & { number: number }>;
-  codeBlocks: Array<CodeBlock & { startLine: number; defaultOpen: boolean }>;
-  notes: string[];
-  truncated?: boolean;
-}
-
-export interface NormalizedUiCard {
-  [key: string]: unknown;
-  kind: "ui_card";
-  title: string;
-  subtitle?: string;
-  blocks: UiBlock[];
-  truncated?: boolean;
-}
-
-type StoredPayload = NormalizedWalkthrough | NormalizedUiCard;
-
-const DEFAULT_DEMO_PAYLOAD: NormalizedWalkthrough = {
-  kind: "walkthrough",
-  title: "Logic Walkthrough 逻辑讲解面板（示例）",
-  subtitle: "在对话中调用 render_logic_walkthrough 或 render_ui_card 后，此处会自动更新为真实卡片",
-  mermaid: [
-    "flowchart LR",
-    '  A["1. 接收输入参数"] --> B["2. 校验与规范化<br/>normalizePayload"]',
-    '  B --> C["3. 渲染 Mermaid 流程图"]',
-    '  C --> D["4. 输出步骤与折叠源码"]',
-  ].join("\n"),
-  steps: [
-    {
-      number: 1,
-      title: "Step 1: 采集真实代码与行号",
-      description:
-        "先通过只读工具核实文件路径与起止行号，提炼关键函数如 `normalizePayload`，确保每条引用真实存在。",
-      fileRef: "server/src/server.ts",
-    },
-    {
-      number: 2,
-      title: "Step 2: 渲染可缩放流程图",
-      description:
-        "支持右上角 `-` / `100%` / `+` 缩放、鼠标拖拽平移、`Mermaid` 查看源码及全屏展开。",
-    },
-    {
-      number: 3,
-      title: "Step 3: 侧栏联动与折叠源码",
-      description:
-        "点击带真实 `file://` URI 的文件引用可直接在侧栏打开对应文件，折叠代码区支持复制与真实行号对齐。",
-    },
-  ],
-  codeBlocks: [
-    {
-      title: "示例入口代码 (server.ts)",
-      fileRef: "server/src/server.ts",
-      language: "typescript",
-      startLine: 1,
-      defaultOpen: true,
-      code: [
-        "export function normalizeWalkthrough(raw: RawInput): NormalizedWalkthrough {",
-        "  // 1. 补全步骤序号与代码块起始行号",
-        "  // 2. 限制单次返回体积在 750 KiB 以内",
-        "  return enforcePayloadBudget(raw);",
-        "}",
-      ].join("\n"),
-    },
-  ],
-  notes: ["提示：这是一个占位示例。请让 AI 分析具体代码后调用 render_logic_walkthrough 或 render_ui_card。"],
-};
-
-let latestPayload: StoredPayload | null = null;
-
-function measureJsonBytes(data: unknown): number {
-  return Buffer.byteLength(JSON.stringify(data), "utf-8");
-}
-
-function truncateCodeText(code: string, maxLines = 40, maxChars = 4000): string {
-  const lines = code.split("\n");
-  if (lines.length > maxLines) {
-    return (
-      lines.slice(0, maxLines).join("\n") +
-      "\n// ...（源码过长已按轨迹体积限制截断，点击上方文件路径可在侧栏查看完整文件）"
-    );
-  }
-  if (code.length > maxChars) {
-    return code.slice(0, maxChars) + "\n// ...（已截断）";
-  }
-  return code;
-}
-
-function enforceWalkthroughBudget(payload: NormalizedWalkthrough): NormalizedWalkthrough {
-  if (measureJsonBytes(payload) <= MAX_PAYLOAD_BYTES) {
-    return payload;
-  }
-
-  const trimmed: NormalizedWalkthrough = {
-    ...payload,
-    codeBlocks: payload.codeBlocks.map((block) => ({ ...block })),
-    truncated: true,
-  };
-
-  for (let i = trimmed.codeBlocks.length - 1; i >= 0 && measureJsonBytes(trimmed) > MAX_PAYLOAD_BYTES; i--) {
-    trimmed.codeBlocks[i].code = truncateCodeText(trimmed.codeBlocks[i].code);
-  }
-
-  if (measureJsonBytes(trimmed) > MAX_PAYLOAD_BYTES) {
-    trimmed.notes = [
-      ...trimmed.notes,
-      "部分超长代码内容已自动精简，以符合单次工具结果体积限制。",
-    ];
-    while (trimmed.codeBlocks.length > 1 && measureJsonBytes(trimmed) > MAX_PAYLOAD_BYTES) {
-      trimmed.codeBlocks.pop();
-    }
-  }
-
-  return trimmed;
-}
-
-function enforceUiCardBudget(payload: NormalizedUiCard): NormalizedUiCard {
-  if (measureJsonBytes(payload) <= MAX_PAYLOAD_BYTES) {
-    return payload;
-  }
-
-  const trimmed: NormalizedUiCard = {
-    ...payload,
-    blocks: payload.blocks.map((block) => ({ ...block })),
-    truncated: true,
-  };
-
-  for (let i = trimmed.blocks.length - 1; i >= 0 && measureJsonBytes(trimmed) > MAX_PAYLOAD_BYTES; i--) {
-    const block = trimmed.blocks[i];
-    if (block.type === "code") {
-      trimmed.blocks[i] = {
-        ...block,
-        code: truncateCodeText(block.code),
-      };
-    }
-  }
-
-  if (measureJsonBytes(trimmed) > MAX_PAYLOAD_BYTES) {
-    trimmed.blocks.push({
-      type: "callout",
-      tone: "info",
-      title: "体积保护提示",
-      text: "部分超长代码块已按单次工具结果体积限制自动精简。",
-    });
-  }
-
-  return trimmed;
-}
-
-function normalizeWalkthrough(input: {
-  title: string;
-  subtitle?: string;
-  mermaid?: string;
+  nodeDetails?: Record<string, MermaidNodeDetail>;
   steps?: StepItem[];
   codeBlocks?: CodeBlock[];
   notes?: string[];
+  commentable?: boolean;
+  allowCustomInput?: boolean;
 }): NormalizedWalkthrough {
   const steps = (input.steps ?? []).map((step, index) => ({
     ...step,
@@ -308,54 +119,51 @@ function normalizeWalkthrough(input: {
 
   return enforceWalkthroughBudget({
     kind: "walkthrough",
+    cardId: createCardId("wt"),
+    createdAt: Date.now(),
     title: input.title,
     subtitle: input.subtitle,
     mermaid: input.mermaid?.trim() || undefined,
+    nodeDetails: input.nodeDetails,
     steps,
     codeBlocks,
     notes: input.notes ?? [],
+    commentable: input.commentable,
+    allowCustomInput: input.allowCustomInput,
   });
 }
 
-function normalizeUiCard(input: {
+export function normalizeUiCard(input: {
   title: string;
   subtitle?: string;
   blocks: UiBlock[];
+  commentable?: boolean;
+  allowCustomInput?: boolean;
 }): NormalizedUiCard {
-  let codeBlockCount = 0;
+  const codeCounter = { count: 0 };
   const blocks: UiBlock[] = input.blocks.map((block) => {
-    if (block.type === "steps") {
+    if (block.type === "tabs") {
       return {
         ...block,
-        items: block.items.map((item, idx) => ({
-          ...item,
-          number: item.number ?? idx + 1,
+        defaultTab: block.defaultTab ?? block.tabs[0]?.id,
+        tabs: block.tabs.map((tab) => ({
+          ...tab,
+          blocks: tab.blocks.map((leaf) => normalizeLeafBlock(leaf, codeCounter)),
         })),
       };
     }
-    if (block.type === "code") {
-      const defaultOpen = block.defaultOpen ?? codeBlockCount === 0;
-      codeBlockCount += 1;
-      return {
-        ...block,
-        startLine: block.startLine ?? 1,
-        defaultOpen,
-      };
-    }
-    if (block.type === "mermaid") {
-      return {
-        ...block,
-        code: block.code.trim(),
-      };
-    }
-    return block;
+    return normalizeLeafBlock(block, codeCounter);
   });
 
   return enforceUiCardBudget({
     kind: "ui_card",
+    cardId: createCardId("card"),
+    createdAt: Date.now(),
     title: input.title,
     subtitle: input.subtitle,
     blocks,
+    commentable: input.commentable,
+    allowCustomInput: input.allowCustomInput,
   });
 }
 
@@ -366,12 +174,13 @@ function buildWalkthroughSummary(data: NormalizedWalkthrough): string {
     `${data.codeBlocks.length} 段可折叠源码`,
   ];
   if (data.mermaid) {
-    parts.push("1 张 Mermaid 流程图");
+    const linked = data.nodeDetails ? Object.keys(data.nodeDetails).length : 0;
+    parts.push(linked > 0 ? `1 张可交互 Mermaid 流程图（${linked} 个联动节点）` : "1 张 Mermaid 流程图");
   }
   if (data.truncated) {
-    parts.push("（部分超长代码块已按体积限制精简）");
+    parts.push("（部分超长代码已按 1 MiB 轨迹限制精简）");
   }
-  return parts.join("，") + "。";
+  return `${parts.join("，")}。`;
 }
 
 function buildUiCardSummary(data: NormalizedUiCard): string {
@@ -381,7 +190,7 @@ function buildUiCardSummary(data: NormalizedUiCard): string {
   }
   const summaryParts = Array.from(blockCounts.entries()).map(([k, v]) => `${k}×${v}`);
   return `已生成声明式交互卡片：「${data.title}」（组件：${summaryParts.join("、")}）。${
-    data.truncated ? "（部分超长代码块已自动精简）" : ""
+    data.truncated ? "（部分超长内容已按体积限制自动精简）" : ""
   }`;
 }
 
@@ -401,7 +210,7 @@ async function loadAppHtml(): Promise<string> {
 
 const server = new McpServer({
   name: "visual-walkthrough",
-  version: "1.1.0",
+  version: PLUGIN_VERSION,
 });
 
 registerAppResource(
@@ -409,7 +218,7 @@ registerAppResource(
   "Logic Walkthrough App",
   APP_URI,
   {
-    description: "结构化源码逻辑讲解卡片与声明式交互卡片渲染器",
+    description: "结构化源码逻辑讲解卡片与声明式交互组件卡片渲染器",
     mimeType: RESOURCE_MIME_TYPE,
     _meta: {
       ui: {
@@ -442,7 +251,7 @@ registerAppTool(
   {
     title: "渲染源码逻辑讲解卡片",
     description:
-      "将多步骤业务代码或流水线逻辑渲染为带 Mermaid 缩放流程图、精准步骤行号与可折叠源码的交互卡片。",
+      "将多步骤业务代码或流水线逻辑渲染为带 Mermaid 缩放与节点联动流程图、精准步骤行号与可折叠源码的交互卡片。",
     inputSchema: WalkthroughInputShape,
     _meta: {
       ui: {
@@ -452,10 +261,10 @@ registerAppTool(
   },
   async (args) => {
     const normalized = normalizeWalkthrough(args);
-    latestPayload = normalized;
+    await storage.saveCard(normalized);
     return {
       content: [{ type: "text", text: buildWalkthroughSummary(normalized) }],
-      structuredContent: normalized,
+      structuredContent: { ...normalized, surfaceHint: "inline" },
     };
   },
 );
@@ -466,7 +275,7 @@ registerAppTool(
   {
     title: "渲染声明式交互组件卡片",
     description:
-      "自由组合表格（含状态徽章）、结论/建议提示框（Callout）、Mermaid 流程图、步骤列表、折叠源码以及可触发 Send 对话回调的操作按钮行，并附带 Spec Source 查看。",
+      "自由组合 13 类研发交互积木（table/callout/mermaid/steps/code/text/actions/tabs/metrics/diff/findings/plan/decision），支持行内批注、暂存队列同步至输入框 Context Pill 与一键汇总发送。",
     inputSchema: UiCardInputShape,
     _meta: {
       ui: {
@@ -476,10 +285,10 @@ registerAppTool(
   },
   async (args) => {
     const normalized = normalizeUiCard(args);
-    latestPayload = normalized;
+    await storage.saveCard(normalized);
     return {
       content: [{ type: "text", text: buildUiCardSummary(normalized) }],
-      structuredContent: normalized,
+      structuredContent: { ...normalized, surfaceHint: "inline" },
     };
   },
 );
@@ -488,9 +297,9 @@ registerAppTool(
   server,
   "open_walkthrough_pane",
   {
-    title: "打开逻辑讲解侧栏面板",
+    title: "打开逻辑讲解侧栏工作台",
     description:
-      "在侧栏打开卡片面板；支持传入空对象 {} 以展示最近一次生成的逻辑卡片/声明式交互卡片或内置示例。",
+      "在侧栏打开无高度限制的卡片工作台；传入空对象 {} 时自动加载最近一张历史卡片，并支持切换历史记录与 Mini Gallery 示例。",
     inputSchema: OptionalWalkthroughInputShape,
     _meta: {
       ui: {
@@ -507,29 +316,137 @@ registerAppTool(
     },
   },
   async (args) => {
-    const payload: StoredPayload = args.title
-      ? normalizeWalkthrough({
-          title: args.title,
-          subtitle: args.subtitle,
-          mermaid: args.mermaid,
-          steps: args.steps,
-          codeBlocks: args.codeBlocks,
-          notes: args.notes,
-        })
-      : (latestPayload ?? DEFAULT_DEMO_PAYLOAD);
-
+    let payload: StoredPayload;
     if (args.title) {
-      latestPayload = payload;
+      payload = normalizeWalkthrough({
+        title: args.title,
+        subtitle: args.subtitle,
+        mermaid: args.mermaid,
+        nodeDetails: args.nodeDetails,
+        steps: args.steps,
+        codeBlocks: args.codeBlocks,
+        notes: args.notes,
+        commentable: args.commentable,
+        allowCustomInput: args.allowCustomInput,
+      });
+      await storage.saveCard(payload);
+    } else {
+      payload = (await storage.getLatestCard()) ?? DEFAULT_DEMO_PAYLOAD;
     }
+
+    const history = await storage.listHistory();
+    const enriched: StoredPayload = {
+      ...payload,
+      surfaceHint: "aux_pane",
+      history,
+    };
 
     return {
       content: [{ type: "text", text: buildAnySummary(payload) }],
-      structuredContent: payload,
+      structuredContent: enriched,
+    };
+  },
+);
+
+// 以下为严格仅限 App 调用的隐藏工具（visibility: ["app"]），模型不可见
+registerAppTool(
+  server,
+  "app_list_history",
+  {
+    title: "列出历史卡片与组件示例",
+    description: "App-only: 返回持久化的最近 30 张卡片摘要及内置 Mini Gallery 列表。",
+    inputSchema: {},
+    _meta: {
+      ui: {
+        visibility: ["app"],
+      },
+    },
+  },
+  async () => {
+    const history = await storage.listHistory();
+    const gallery = MINI_GALLERY.map((item) => ({
+      id: item.id,
+      label: item.label,
+      description: item.description,
+    }));
+    return {
+      content: [{ type: "text", text: `历史卡片 ${history.length} 张，内置示例 ${gallery.length} 个。` }],
+      structuredContent: {
+        persistent: storage.persistent,
+        history,
+        gallery,
+      },
+    };
+  },
+);
+
+registerAppTool(
+  server,
+  "app_get_card",
+  {
+    title: "读取单张历史卡片或示例卡片",
+    description: "App-only: 按 cardId 从插件数据目录或内置 Gallery 加载完整卡片及草稿。",
+    inputSchema: AppGetCardInputShape,
+    _meta: {
+      ui: {
+        visibility: ["app"],
+      },
+    },
+  },
+  async (args) => {
+    const card = args.cardId.startsWith("gallery:")
+      ? findGalleryPayload(args.cardId)
+      : await storage.getCardById(args.cardId);
+
+    if (!card) {
+      return {
+        isError: true,
+        content: [{ type: "text", text: `未找到卡片：${args.cardId}` }],
+      };
+    }
+
+    const history = await storage.listHistory();
+    return {
+      content: [{ type: "text", text: `已加载卡片：「${card.title}」` }],
+      structuredContent: {
+        ...card,
+        surfaceHint: "aux_pane",
+        history,
+      },
+    };
+  },
+);
+
+registerAppTool(
+  server,
+  "app_save_draft",
+  {
+    title: "持久化卡片批注草稿",
+    description: "App-only: 在无 teardown 通知的宿主中实时保存用户在卡片内的勾选、批注与补充输入。",
+    inputSchema: AppSaveDraftInputShape,
+    _meta: {
+      ui: {
+        visibility: ["app"],
+      },
+    },
+  },
+  async (args) => {
+    await storage.saveDraft({
+      cardId: args.cardId,
+      updatedAt: Date.now(),
+      queued: args.queued,
+      comments: args.comments,
+      customNote: args.customNote,
+    });
+    return {
+      content: [{ type: "text", text: "草稿已保存" }],
+      structuredContent: { ok: true, persistent: storage.persistent },
     };
   },
 );
 
 async function main() {
+  await storage.init();
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }

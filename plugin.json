@@ -1,15 +1,15 @@
 {
   "name": "visual-walkthrough",
   "displayName": "Visual Walkthrough",
-  "version": "1.1.0",
-  "description": "在对话中自动输出三类合规可视化交互内容：声明式组件决策卡片（表格/徽章/Callout/可发回对话的 Send 按钮与 Source 查看）、源码逻辑讲解卡片（Mermaid 缩放 + 步骤行号跳转 + 折叠源码）与可交互视觉原型。",
+  "version": "2.0.0",
+  "description": "在对话与侧栏中输出三类合规交互可视化内容：支持行内批注与 Context Pill 暂存的 13 积木声明式研发卡片（表格/指标/Tabs/Diff/Findings/Plan/Decision）、支持节点联动的源码逻辑讲解卡片与可交互视觉原型。",
   "author": "a",
   "homepage": "https://github.com/yanliangyuYLY/visual-walkthrough",
   "repository": "https://github.com/yanliangyuYLY/visual-walkthrough",
   "logo": "assets/logo.svg",
   "suggestedPrompts": [
-    "梳理当前核心模块的执行逻辑，并用流程图和源码步骤卡片展示",
-    "用逐字段排查表、结论提示框和一键应用优化按钮输出分析结果",
+    "梳理当前核心模块的执行逻辑，用带节点联动的流程图和源码步骤卡片展示",
+    "用 Findings、Diff 与可勾选的 Plan 卡片输出本次代码审查和修复方案",
     "为这个页面需求设计一个可交互的视觉原型（含正常态、弹窗态与重置）"
   ]
 }

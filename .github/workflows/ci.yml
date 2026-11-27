@@ -23,10 +23,11 @@ jobs:
         working-directory: server
         run: npm ci
 
-      - name: Typecheck and build self-contained bundles
+      - name: Typecheck, test and build self-contained bundles
         working-directory: server
         run: |
           npm run typecheck
+          npm test
           npm run build
 
       - name: Audit CSP zero external links and bundle size
@@ -44,7 +45,7 @@ jobs:
           rm -rf "$TMP_DIR/plugin/server/node_modules"
           node --input-type=module -e '
             import { spawn } from "node:child_process";
-            const child = spawn("node", ["'"$TMP_DIR"'/plugin/server/dist/server.mjs"], { stdio: ["pipe", "pipe", "inherit"] });
+            const child = spawn("node", ["'"$TMP_DIR"'/plugin/server/dist/server.mjs", "--data_dir='"$TMP_DIR"'/data"], { stdio: ["pipe", "pipe", "inherit"] });
             let buf = "";
             const responses = new Map();
             child.stdout.on("data", (chunk) => {
@@ -68,7 +69,7 @@ jobs:
                 }
               }, 20);
             });
-            send({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2024-11-05", capabilities: {}, clientInfo: { name: "ci", version: "1.0.0" } } });
+            send({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2024-11-05", capabilities: {}, clientInfo: { name: "ci", version: "2.0.0" } } });
             const initRes = await waitId(1);
             if (!initRes.result?.capabilities?.tools || !initRes.result?.capabilities?.resources) {
               throw new Error("Missing capabilities");
@@ -76,10 +77,19 @@ jobs:
             send({ jsonrpc: "2.0", method: "notifications/initialized" });
             send({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} });
             const toolsRes = await waitId(2);
-            const names = (toolsRes.result?.tools || []).map((t) => t.name);
+            const tools = toolsRes.result?.tools || [];
+            const names = tools.map((t) => t.name);
             console.log("Tools:", names);
-            if (!names.includes("render_ui_card") || !names.includes("render_logic_walkthrough") || !names.includes("open_walkthrough_pane")) {
-              throw new Error("Unexpected tools: " + JSON.stringify(names));
+            for (const required of ["render_ui_card", "render_logic_walkthrough", "open_walkthrough_pane", "app_list_history", "app_get_card", "app_save_draft"]) {
+              if (!names.includes(required)) {
+                throw new Error("Missing tool: " + required);
+              }
+            }
+            for (const appTool of tools.filter((t) => t.name.startsWith("app_"))) {
+              const vis = appTool._meta?.ui?.visibility;
+              if (!Array.isArray(vis) || vis.length !== 1 || vis[0] !== "app") {
+                throw new Error("App-only tool missing strict visibility: " + appTool.name);
+              }
             }
             child.kill();
           '

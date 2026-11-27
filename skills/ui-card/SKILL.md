@@ -1,43 +1,43 @@
 ---
 name: ui-card
-description: 使用声明式组件引擎（表格、状态徽章、Callout 提示框、Mermaid 流程图、步骤、折叠源码与支持发回对话的 Send 按钮行）渲染排查报告、方案对比与交互决策卡片。
+description: 使用声明式组件引擎（13 类研发积木：表格、指标条、Tabs、Diff、Findings 审查清单、Plan 实施计划、Decision 加权对比、Callout、Mermaid 节点联动、步骤、折叠源码及支持暂存与 Context Pill 的交互按钮）渲染排查报告、Code Review、实施审批与技术选型卡片。
 ---
 
 # 声明式交互组件卡片（UI Card）
 
-当需要向用户展示**逐项排查报告、字段状态对比、多方案决策选择**，或希望给用户提供**点击即可发回对话执行下一步的按钮**时，调用 MCP 工具 `render_ui_card`。
+当需要向用户展示**排查报告、Code Review 问题清单、代码 Diff、实施计划审批、多方案加权选型**，或希望用户**勾选多项、行内批注并汇总发回对话**时，调用 MCP 工具 `render_ui_card`。
 
-## 组件积木清单（`blocks` 数组按顺序渲染）
+## 13 类积木速查（`blocks` 数组按顺序渲染）
 
-1. **`table`（排查/对比表格）**：
-   - `columns`: 列标题数组（如 `["字段", "文本内容", "未识别原因"]`）。
-   - `rows`: 二维数组，单元格支持：
-     - 纯字符串 `"18409787715"`
-     - 状态圆点徽章 `{ "badge": "12位，非11位", "tone": "bad" }`（`tone` 可选 `good` | `warn` | `bad` | `info` | `neutral`）
-     - 行内代码 `{ "code": "normalizeText" }`
-     - 可点击文件链接 `{ "fileRef": "src/parser.ts:52", "fileUri": "file:///..." }`
-2. **`callout`（结论 / 提示 / 建议框）**：
-   - `tone`: `"good"`（验证通过/结论）、`"info"`（建议优化项/说明）、`"warn"`（风险提示）、`"bad"`（阻断错误）。
-   - `title`: 标题，如 `实测验证结论`、`建议优化项`。
-   - `text`: 正文（支持 `\n` 换行及反引号 `` `code` `` 行内高亮）。
-3. **`actions`（底部决策按钮行）**：
-   - `buttons`: 建议提供 2~4 个清晰互斥的决策按钮，推荐项设为 `"variant": "primary"`，其余为 `"secondary"`（高危操作可用 `"danger"`）。
-   - `action` 支持三种类型：
-     - `{"type": "send", "text": "..."}`：点击后通过官方 `app.sendMessage()` 将 `text` 作为用户消息直接发回当前对话驱动 AI 继续执行！**`text` 必须写成完整、无歧义的可执行指令**（例如 `"修改 clipboardParser.ts：1. 无标签身份证号增加省码+合法出生日期兜底；2. 无标签姓名分词增加数字边界拆分"`，不要写模糊的 `"选第一个"`）。
-     - `{"type": "copy", "text": "..."}`：一键复制到剪贴板。
-     - `{"type": "open_file", "fileUri": "file:///..."}`：在侧栏打开对应文件。
-4. **`mermaid` / `steps` / `code` / `text`**：
-   - 也可在同一卡片中自由混排可缩放 `mermaid` 流程图、带行号跳转的 `steps`、可折叠 `code` 块和补充 `text` 段落。
+### 基础与布局积木
+1. **`metrics`**：2~4 列紧凑 KPI 条（`items: [{ label, value, delta?, tone? }]`），一屏呈现统计与前后对比。
+2. **`tabs`**：分栏收纳容器（`defaultTab?, tabs: [{ id, label, badge?, blocks }]`，不支持 Tab 套 Tab），**专治内联 800px 高度上限**。
+3. **`table`**：排查/对比表格（`columns`, `rows`, `commentable?`），单元格支持纯文本、状态圆点徽章 `{ badge, tone }`、行内代码 `{ code }`、侧栏文件链接 `{ fileRef, fileUri }`。
+4. **`callout`**：结论/建议/风险提示框（`tone: "good"|"info"|"warn"|"bad"`, `title?`, `text`）。
+5. **`actions`**：操作按钮行（`buttons: [{ label, variant?, action }]`），`action` 支持：
+   - `{ type: "send", text }`：立即发回对话（若有已暂存反馈/批注，会自动合并为一条消息一并发送并清空暂存）；**`text` 必须写成完整无歧义指令**。
+   - `{ type: "queue", text, label? }`：加入/移出暂存队列并同步到输入框 Context Pill，适合多个独立可选项。
+   - `{ type: "copy", text }` / `{ type: "open_file", fileUri }`。
+6. **`mermaid` / `steps` / `code` / `text`**：可缩放且支持 `nodeDetails` 节点联动的流程图、带 `commentable` 行内批注的步骤列表、带行号折叠源码与说明文本。
 
-## 使用原则
+### 研发专用高交互积木
+7. **`diff`**：Unified Diff 对比块（`title?`, `fileRef?`, `fileUri?`, `patch`, `defaultOpen?`），红绿增删行与双行号渲染。
+8. **`findings`**：代码审查/Bug 清单（`title?`, `items: [{ severity, title, fileRef?, fileUri?, line?, rule?, detail?, fix?, fixIsDiff?, defaultSelected? }]`, `selectable?`, `commentable?`, `submitLabel?`），自带严重度筛选胶囊与一键修复已勾选项。
+9. **`plan`**：实施计划审批清单（`title?`, `steps: [{ title, detail?, files?, risk?, estimate?, optional?, defaultChecked? }]`, `commentable?`, `submitLabel?`），支持勾选步骤、行内批注与一键批准执行。
+10. **`decision`**：本地加权选型对比器（`criteria: [{ name, weight?, note? }]`, `options: [{ name, scores, pros?, cons?, note?, recommended?, actionText? }]`, `submitLabel?`），用户拖动滑块纯前端重算得分排名，零模型调用。
 
-- 所有卡片自带右下角 `<> Source` 按钮，方便用户展开查看/复制本次卡片的类 DSL 源码。
-- 工具渲染完成后，正文只保留 1~2 句简短导语或补充，**不要**把表格和建议在正文中重复写一遍。
-- 若只是纯粹的源码链路讲解（纯 Mermaid + 步骤 + 折叠代码），优先使用 `render_logic_walkthrough`；若需要表格、Callout 或交互决策按钮，使用 `render_ui_card`。
+> 详细字段定义与典型 JSON 示例请按需查阅 [blocks-reference.md](./references/blocks-reference.md)。
 
-### 版面紧凑与防滚动规范
+## 双向批注与暂存规范
 
-Antigravity 对话内联视图高度上限为 `800px`，为了让卡片一屏展示完整、不出现内部滚动条：
-1. **表格控制在 3~4 列**：避免 5 列以上把“原因/说明”列挤窄拉高；可将代码位置合并进原因末尾括号中（如 `...(clipboardParser.ts:199)`），或仅在必要时单列。
-2. **文案精炼**：原因/说明保持在 1~2 句话内直击重点，避免大段长文。
-3. **超大内容分流**：若表格超过 6 行或附带大段源码导致整体超出 `800px`，提示用户可在侧栏 `+` 菜单打开 `Logic Walkthrough`（`aux_pane`）无高度限制完整浏览。
+- 当方案或排查项需要用户挑拣或补充意见时，开启 `commentable: true` 与 `allowCustomInput: true`。
+- 用户的勾选、批注与补充说明会通过官方 `app.updateModelContext()` 实时同步到输入框 Context Pill，也可点击底部「发送汇总」一次性提交。
+- `findings`、`plan`、`decision` 已内置主提交按钮，通常无需再额外堆叠重复的 `actions` 发送按钮。
+
+## 版面紧凑与防溢出规范
+
+Antigravity 对话内联视图高度上限为 `800px`，单次工具结果体积上限为 `1 MiB`：
+1. **善用 `tabs` 分栏**：当卡片同时包含流程图、问题表和代码/Diff 时，优先放入 `tabs` 的不同标签页，确保首屏无需滚动即可完整阅读。
+2. **表格精简在 3~4 列**：避免 5 列以上把说明列挤窄拉高；文案保持 1~2 句直击重点。
+3. **不重复刷屏**：工具渲染完成后，正文只保留 1~2 句导语或关键结论，不要在正文复述卡片内的表格与列表。
+4. **超大内容引导侧栏**：需要无高度限制全屏浏览或回顾历史卡片时，引导用户通过侧栏 `+` 菜单打开 `Logic Walkthrough`（`aux_pane`）。

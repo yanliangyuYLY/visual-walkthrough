@@ -2,7 +2,7 @@
   "mcpServers": {
     "walkthrough": {
       "command": "node",
-      "args": ["${PLUGIN_ROOT}/server/dist/server.mjs"]
+      "args": ["${PLUGIN_ROOT}/server/dist/server.mjs", "--data_dir=${PLUGIN_DATA}"]
     }
   }
 }

@@ -10,5 +10,5 @@
     "resolveJsonModule": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["src/**/*.ts", "ui/**/*.ts", "vite.config.ts"]
+  "include": ["src/**/*.ts", "ui/**/*.ts", "tests/**/*.ts", "vite.config.ts"]
 }

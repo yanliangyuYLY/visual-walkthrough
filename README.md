@@ -1,21 +1,21 @@
 # Visual Walkthrough
 
-作者：`a` · 协议：[MIT License](./LICENSE)
+作者：`a` · 版本：`2.0.0` · 协议：[MIT License](./LICENSE)
 
-**Visual Walkthrough** 是一个符合 Antigravity 官方插件架构与安全规范的跨平台混合一体插件，用于在对话中主动或按需输出三类高交互可视化内容：
+**Visual Walkthrough** 是一个符合 Google / Gemini Antigravity 官方插件架构与安全规范的跨平台混合一体插件，聚焦研发高频协作场景，在对话内联与侧栏工作台中提供三类高交互可视化内容：
 
-1. **声明式交互组件卡片（MCP App — `render_ui_card`）**
-   - 自由组合 `table`（含彩色圆点 `badge`、行内代码、可点击文件引用）、`callout`（`good` / `info` / `warn` / `bad`）、`mermaid`、`steps`、`code`、`text` 与 `actions` 按钮行。
-   - **对话回调**：`send` 按钮通过官方 `@modelcontextprotocol/ext-apps` 的 `app.sendMessage()` 直接把下一步指令发回当前对话继续执行；支持 `copy` 一键复制与 `open_file`（`toggle-aux-pane`）侧栏跳转源码。
-   - **Spec 源码查看**：卡片右下角提供 `<> Source` 开关，展示类 DSL 源码并支持复制。
+1. **声明式研发交互卡片（MCP App — `render_ui_card`）**
+   - **13 类研发积木**：基础 7 类（`table`、`callout`、`mermaid`、`steps`、`code`、`text`、`actions`）+ 研发 6 类（`tabs`、`metrics`、`diff`、`findings`、`plan`、`decision`）。
+   - **双向协作批注与 Context Pill**：支持 `queue` 暂存按钮、条目级行内批注（`commentable`）与自由补充框（`allowCustomInput`）；用户交互后通过官方 `app.updateModelContext()` 实时同步至输入框 Context Pill，并支持底部汇总条一键 `app.sendMessage()` 发送并自动清空。
+   - **800px 高度优化 & 本地计算**：`tabs` 分栏收纳避免内联截断；`decision` 维度权重滑块在前端零 LLM 调用实时重排；`<> Source` 随时查看/复制类 DSL 源码。
 
-2. **逻辑讲解卡片（MCP App — `render_logic_walkthrough` / `open_walkthrough_pane`）**
-   - 内置可缩放（`-` / `100%` / `+`）、拖拽平移、源码切换与展开的 **Mermaid** 流程图。
-   - 带精准行号跳转的步骤拆解列表与可折叠真实源码卡片，支持 `aux_pane` 侧栏打开。
+2. **可探索逻辑讲解卡片与侧栏工作台（MCP App — `render_logic_walkthrough` / `open_walkthrough_pane`）**
+   - 内置可缩放（`-` / `100%` / `+`）、拖拽平移、源码切换、展开与 **`nodeDetails` 节点点击联动**的 Mermaid 流程图（点击节点展示详情、高亮定位对应步骤、侧栏 `toggle-aux-pane` 跳转源文件）。
+   - 基于 `${PLUGIN_DATA}` 原子持久化最近 30 张历史卡片与草稿（通过 `visibility: ["app"]` 隐藏工具交互）；侧栏 `aux_pane` 工作台顶部内置**历史卡片切换**与 **4 套 Mini Gallery 组件示例**。
 
 3. **可交互视觉原型（Skill + Generative UI）**
    - `skills/visual-prototype/SKILL.md` 固化顶部状态切换胶囊栏 + 重置按钮 + 设备外壳 + 双向实时联动设计模式。
-   - 严格遵循官方白名单 Tailwind、宿主 CSS 语义变量与内联/独立 Artifact 高度规范。
+   - 严格遵循官方白名单 Tailwind、宿主 CSS 语义变量、`<canvas>` 监听 `themechange` 与 450px 内联/独立 Artifact 高度规范。
 
 ---
 
@@ -23,7 +23,7 @@
 
 - **操作系统**：Windows / macOS / Linux 全平台支持
 - **运行时**：**Node.js >= 18**（且 `node` 命令位于系统 `PATH` 中）
-  - 仓库已内置零依赖编译产物 `server/dist/server.mjs` 与单文件前端 `server/dist/ui/index.html`，**安装后无需执行 `npm install`**。
+  - 仓库已内置零依赖自包含编译产物 `server/dist/server.mjs` 与单文件前端 `server/dist/ui/index.html`，**安装后无需执行 `npm install`**。
   - *macOS nvm 用户提示*：如果从桌面 GUI 应用启动时提示找不到 `node`，请为系统提供稳定的 `node` 路径（例如通过 Homebrew 安装或将当前 nvm 的 `node` 软链至 `/usr/local/bin/node`）。
 
 ---
@@ -51,20 +51,22 @@ agy plugin install ./visual-walkthrough
 
 ## 合规性与安全设计
 
-- **严格 CSP 零外链**：MCP App 前端使用 Vite + `vite-plugin-singlefile` 打包为单个自包含 HTML，零外部 CDN 脚本/样式，100% 满足 `default-src 'none'` 沙箱策略。
-- **官方 SDK 与能力门控**：使用 `@modelcontextprotocol/ext-apps` 通信，先注册事件回调再 `connect()`；所有 `sendMessage` 按钮按 `app.getHostCapabilities()?.message` 门控，实时适配宿主深浅色主题变量。
-- **主动触发与克制边界**：`rules/AGENTS.md`（纯 Markdown 无 frontmatter）指导 AI 在排查对照、复杂流程梳理和 UI 原型设计时主动可视化，日常简单问答保持克制。
+- **严格 CSP 零外链**：MCP App 前端使用 Vite + `vite-plugin-singlefile` 打包为单个自包含 HTML（零新增前端重型依赖，约 `5.4 MiB`，远低于 `10 MiB` 上限），100% 满足 `default-src 'none'` 沙箱策略。
+- **最小权限模型**：MCP 服务端绝不充当任意本地文件读取代理，持久化仅限于 Antigravity 分配的 `${PLUGIN_DATA}` 目录，源文件打开统一由宿主 `com.google.antigravity/toggle-aux-pane` 受控完成。
+- **官方 SDK 与能力门控**：使用 `@modelcontextprotocol/ext-apps` 通信，先注册事件回调再 `connect()`；按 `hostCapabilities` 严格门控 `message` / `updateModelContext` / `serverTools`；主题切换无损保留用户输入批注、队列与滑块权重状态；App-Only 工具严格标注 `visibility: ["app"]`。
+- **递归体积预算与规则预算**：递归裁剪 `code`、`diff`、`findings.fix` 及 `tabs` 内嵌套块（750 KiB 安全线，低于 1 MiB 轨迹上限）；`rules/AGENTS.md`（纯 Markdown 无 frontmatter，`< 3 KB`）与 `skills/ui-card/references/` 遵循渐进式披露规范。
 
 ---
 
-## 本地开发与二次构建
+## 本地开发、测试与构建
 
-如果你修改了 `server/src/` 或 `server/ui/` 源码，请重新构建并提交更新后的 `server/dist/`：
+如果你修改了 `server/src/` 或 `server/ui/` 源码，请运行测试并重新构建自包含产物 `server/dist/`：
 
 ```bash
 cd server
 npm install
 npm run typecheck
+npm test
 npm run build
 ```
 

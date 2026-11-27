@@ -239,10 +239,10 @@ function assignProp(target, prop, value) {
     configurable: true
   });
 }
-function getElementAtPath(obj, path2) {
-  if (!path2)
+function getElementAtPath(obj, path3) {
+  if (!path3)
     return obj;
-  return path2.reduce((acc, key) => acc?.[key], obj);
+  return path3.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -491,11 +491,11 @@ function aborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path2, issues) {
+function prefixIssues(path3, issues) {
   return issues.map((iss) => {
     var _a;
     (_a = iss).path ?? (_a.path = []);
-    iss.path.unshift(path2);
+    iss.path.unshift(path3);
     return iss;
   });
 }
@@ -684,7 +684,7 @@ function treeifyError(error40, _mapper) {
     return issue2.message;
   };
   const result = { errors: [] };
-  const processError = (error41, path2 = []) => {
+  const processError = (error41, path3 = []) => {
     var _a, _b;
     for (const issue2 of error41.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
@@ -694,7 +694,7 @@ function treeifyError(error40, _mapper) {
       } else if (issue2.code === "invalid_element") {
         processError({ issues: issue2.issues }, issue2.path);
       } else {
-        const fullpath = [...path2, ...issue2.path];
+        const fullpath = [...path3, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -724,9 +724,9 @@ function treeifyError(error40, _mapper) {
   processError(error40);
   return result;
 }
-function toDotPath(path2) {
+function toDotPath(path3) {
   const segs = [];
-  for (const seg of path2) {
+  for (const seg of path3) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -14876,8 +14876,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path2) {
-      let input = path2;
+    function removeDotSegments(path3) {
+      let input = path3;
       const output = [];
       let nextSlash = -1;
       let len = 0;
@@ -14951,11 +14951,11 @@ var require_utils = __commonJS({
       }
       return output.join("");
     }
-    function removeDotSegmentsRelative(path2) {
-      if (path2 === "" || path2[0] === "/") {
-        return removeDotSegments(path2);
+    function removeDotSegmentsRelative(path3) {
+      if (path3 === "" || path3[0] === "/") {
+        return removeDotSegments(path3);
       }
-      const segments = path2.split("/");
+      const segments = path3.split("/");
       const last = segments.length - 1;
       const output = [];
       let trailingDirectory = false;
@@ -15318,8 +15318,8 @@ var require_schemes = __commonJS({
       }
       if (wsComponent.resourceName) {
         const queryIndex = wsComponent.resourceName.indexOf("?");
-        const path2 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
-        wsComponent.path = path2 && path2 !== "/" ? path2 : void 0;
+        const path3 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path3 && path3 !== "/" ? path3 : void 0;
         wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
@@ -18856,12 +18856,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name}"`);
       return f2;
     };
-    function addFormats(ajv, list, fs2, exportName) {
+    function addFormats(ajv, list, fs3, exportName) {
       var _a;
       var _b;
       (_a = (_b = ajv.opts.code).formats) !== null && _a !== void 0 ? _a : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f2 of list)
-        ajv.addFormat(f2, fs2[f2]);
+        ajv.addFormat(f2, fs3[f2]);
     }
     module.exports = exports = formatsPlugin;
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -18870,8 +18870,9 @@ var require_dist = __commonJS({
 });
 
 // src/server.ts
-import fs from "node:fs/promises";
-import path from "node:path";
+import crypto from "node:crypto";
+import fs2 from "node:fs/promises";
+import path2 from "node:path";
 import { fileURLToPath } from "node:url";
 
 // node_modules/zod/v3/external.js
@@ -19352,8 +19353,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path2, errorMaps, issueData } = params;
-  const fullPath = [...path2, ...issueData.path || []];
+  const { data, path: path3, errorMaps, issueData } = params;
+  const fullPath = [...path3, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -19469,11 +19470,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path2, key) {
+  constructor(parent, value, path3, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path2;
+    this._path = path3;
     this._key = key;
   }
   get path() {
@@ -23057,11 +23058,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path2) {
-  if (path2.length === 0) {
+function getDotPath(path3) {
+  if (path3.length === 0) {
     return "object root";
   }
-  return path2.reduce((acc, seg, index) => {
+  return path3.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -28790,9 +28791,11 @@ function N3(Z, $, J, X, V) {
   return Z.registerResource($, J, { mimeType: p, ...X }, V);
 }
 
-// src/server.ts
-var APP_URI = "ui://visual-walkthrough/app.html";
-var MAX_PAYLOAD_BYTES = 750 * 1024;
+// src/schema.ts
+var ToneSchema = external_exports.enum(["good", "warn", "bad", "info", "neutral"]);
+var CalloutToneSchema = external_exports.enum(["good", "info", "warn", "bad"]);
+var SeveritySchema = external_exports.enum(["critical", "high", "medium", "low", "info"]);
+var RiskLevelSchema = external_exports.enum(["low", "medium", "high"]);
 var StepItemSchema = external_exports.object({
   number: external_exports.number().int().positive().optional(),
   title: external_exports.string().min(1),
@@ -28811,9 +28814,17 @@ var CodeBlockSchema = external_exports.object({
   code: external_exports.string(),
   defaultOpen: external_exports.boolean().optional()
 });
+var MermaidNodeDetailSchema = external_exports.object({
+  title: external_exports.string().min(1).optional(),
+  summary: external_exports.string().min(1),
+  stepNumber: external_exports.number().int().positive().optional(),
+  fileRef: external_exports.string().optional(),
+  fileUri: external_exports.string().optional(),
+  lineStart: external_exports.number().int().positive().optional()
+});
 var CellBadgeSchema = external_exports.object({
   badge: external_exports.string().min(1),
-  tone: external_exports.enum(["good", "warn", "bad", "info", "neutral"]).optional()
+  tone: ToneSchema.optional()
 });
 var CellCodeSchema = external_exports.object({
   code: external_exports.string()
@@ -28833,29 +28844,84 @@ var ActionButtonSchema = external_exports.object({
   variant: external_exports.enum(["primary", "secondary", "danger"]).optional(),
   action: external_exports.discriminatedUnion("type", [
     external_exports.object({ type: external_exports.literal("send"), text: external_exports.string().min(1) }),
+    external_exports.object({
+      type: external_exports.literal("queue"),
+      text: external_exports.string().min(1),
+      label: external_exports.string().min(1).optional()
+    }),
     external_exports.object({ type: external_exports.literal("copy"), text: external_exports.string().min(1) }),
     external_exports.object({ type: external_exports.literal("open_file"), fileUri: external_exports.string().min(1) })
   ])
 });
-var BlockSchema = external_exports.discriminatedUnion("type", [
+var MetricItemSchema = external_exports.object({
+  label: external_exports.string().min(1),
+  value: external_exports.string().min(1),
+  delta: external_exports.string().optional(),
+  tone: ToneSchema.optional()
+});
+var FindingItemSchema = external_exports.object({
+  id: external_exports.string().min(1).optional(),
+  severity: SeveritySchema,
+  title: external_exports.string().min(1),
+  fileRef: external_exports.string().optional(),
+  fileUri: external_exports.string().optional(),
+  line: external_exports.number().int().positive().optional(),
+  rule: external_exports.string().optional(),
+  detail: external_exports.string().optional(),
+  fix: external_exports.string().optional(),
+  fixIsDiff: external_exports.boolean().optional(),
+  defaultSelected: external_exports.boolean().optional()
+});
+var PlanFileRefSchema = external_exports.object({
+  fileRef: external_exports.string().min(1),
+  fileUri: external_exports.string().optional()
+});
+var PlanStepItemSchema = external_exports.object({
+  id: external_exports.string().min(1).optional(),
+  title: external_exports.string().min(1),
+  detail: external_exports.string().optional(),
+  files: external_exports.array(PlanFileRefSchema).optional(),
+  risk: RiskLevelSchema.optional(),
+  estimate: external_exports.string().optional(),
+  optional: external_exports.boolean().optional(),
+  defaultChecked: external_exports.boolean().optional()
+});
+var DecisionCriterionSchema = external_exports.object({
+  name: external_exports.string().min(1),
+  weight: external_exports.number().min(1).max(5).optional(),
+  note: external_exports.string().optional()
+});
+var DecisionOptionSchema = external_exports.object({
+  name: external_exports.string().min(1),
+  scores: external_exports.array(external_exports.number().min(0).max(10)).min(1),
+  pros: external_exports.array(external_exports.string().min(1)).optional(),
+  cons: external_exports.array(external_exports.string().min(1)).optional(),
+  note: external_exports.string().optional(),
+  recommended: external_exports.boolean().optional(),
+  actionText: external_exports.string().min(1).optional()
+});
+var LeafBlockSchema = external_exports.discriminatedUnion("type", [
   external_exports.object({
     type: external_exports.literal("table"),
     columns: external_exports.array(external_exports.string()).min(1),
-    rows: external_exports.array(external_exports.array(CellSchema))
+    rows: external_exports.array(external_exports.array(CellSchema)),
+    commentable: external_exports.boolean().optional()
   }),
   external_exports.object({
     type: external_exports.literal("callout"),
     title: external_exports.string().optional(),
     text: external_exports.string().min(1),
-    tone: external_exports.enum(["good", "info", "warn", "bad"]).optional()
+    tone: CalloutToneSchema.optional()
   }),
   external_exports.object({
     type: external_exports.literal("mermaid"),
-    code: external_exports.string().min(1)
+    code: external_exports.string().min(1),
+    nodeDetails: external_exports.record(external_exports.string(), MermaidNodeDetailSchema).optional()
   }),
   external_exports.object({
     type: external_exports.literal("steps"),
-    items: external_exports.array(StepItemSchema).min(1)
+    items: external_exports.array(StepItemSchema).min(1),
+    commentable: external_exports.boolean().optional()
   }),
   external_exports.object({
     type: external_exports.literal("code"),
@@ -28874,139 +28940,782 @@ var BlockSchema = external_exports.discriminatedUnion("type", [
   external_exports.object({
     type: external_exports.literal("actions"),
     buttons: external_exports.array(ActionButtonSchema).min(1)
+  }),
+  external_exports.object({
+    type: external_exports.literal("metrics"),
+    items: external_exports.array(MetricItemSchema).min(1).max(6)
+  }),
+  external_exports.object({
+    type: external_exports.literal("diff"),
+    title: external_exports.string().optional(),
+    fileRef: external_exports.string().optional(),
+    fileUri: external_exports.string().optional(),
+    patch: external_exports.string().min(1),
+    defaultOpen: external_exports.boolean().optional()
+  }),
+  external_exports.object({
+    type: external_exports.literal("findings"),
+    title: external_exports.string().optional(),
+    items: external_exports.array(FindingItemSchema).min(1),
+    commentable: external_exports.boolean().optional(),
+    selectable: external_exports.boolean().optional(),
+    submitLabel: external_exports.string().min(1).optional()
+  }),
+  external_exports.object({
+    type: external_exports.literal("plan"),
+    title: external_exports.string().optional(),
+    steps: external_exports.array(PlanStepItemSchema).min(1),
+    commentable: external_exports.boolean().optional(),
+    submitLabel: external_exports.string().min(1).optional()
+  }),
+  external_exports.object({
+    type: external_exports.literal("decision"),
+    criteria: external_exports.array(DecisionCriterionSchema).min(1).max(8),
+    options: external_exports.array(DecisionOptionSchema).min(2).max(6),
+    submitLabel: external_exports.string().min(1).optional()
   })
 ]);
+var TabsBlockSchema = external_exports.object({
+  type: external_exports.literal("tabs"),
+  defaultTab: external_exports.string().min(1).optional(),
+  tabs: external_exports.array(
+    external_exports.object({
+      id: external_exports.string().min(1),
+      label: external_exports.string().min(1),
+      badge: external_exports.string().optional(),
+      blocks: external_exports.array(LeafBlockSchema).min(1)
+    })
+  ).min(1).max(6)
+});
+var BlockSchema = external_exports.union([LeafBlockSchema, TabsBlockSchema]);
 var WalkthroughInputShape = {
   title: external_exports.string().min(1).describe("\u903B\u8F91\u8BB2\u89E3\u5361\u7247\u6807\u9898"),
   subtitle: external_exports.string().optional().describe("\u53EF\u9009\u526F\u6807\u9898\u6216\u5165\u53E3\u6A21\u5757\u8BF4\u660E"),
   mermaid: external_exports.string().optional().describe("\u53EF\u9009 Mermaid \u6D41\u7A0B\u56FE\u4EE3\u7801\uFF08\u63A8\u8350 flowchart LR \u6216 TD\uFF09"),
+  nodeDetails: external_exports.record(external_exports.string(), MermaidNodeDetailSchema).optional().describe("\u53EF\u9009 Mermaid \u8282\u70B9 ID \u5230\u70B9\u51FB\u8BF4\u660E/\u5173\u8054\u6B65\u9AA4/\u6587\u4EF6\u8DF3\u8F6C\u7684\u6620\u5C04"),
   steps: external_exports.array(StepItemSchema).optional().describe("\u5206\u6B65\u903B\u8F91\u62C6\u89E3\u5217\u8868"),
   codeBlocks: external_exports.array(CodeBlockSchema).optional().describe("\u53EF\u6298\u53E0\u6E90\u7801\u7247\u6BB5\u5217\u8868"),
-  notes: external_exports.array(external_exports.string()).optional().describe("\u53EF\u9009\u8865\u5145\u8BF4\u660E\u6216\u6CE8\u610F\u4E8B\u9879")
+  notes: external_exports.array(external_exports.string()).optional().describe("\u53EF\u9009\u8865\u5145\u8BF4\u660E\u6216\u6CE8\u610F\u4E8B\u9879"),
+  commentable: external_exports.boolean().optional().describe("\u662F\u5426\u5141\u8BB8\u5BF9\u6B65\u9AA4\u884C\u5185\u6DFB\u52A0\u6279\u6CE8\u5E76\u6682\u5B58\u5230\u8F93\u5165\u6846\u4E0A\u4E0B\u6587"),
+  allowCustomInput: external_exports.boolean().optional().describe("\u662F\u5426\u5728\u5E95\u90E8\u663E\u793A\u81EA\u7531\u8865\u5145\u53CD\u9988\u8F93\u5165\u6846")
 };
 var UiCardInputShape = {
   title: external_exports.string().min(1).describe("\u4EA4\u4E92\u5361\u7247\u6807\u9898"),
   subtitle: external_exports.string().optional().describe("\u53EF\u9009\u526F\u6807\u9898"),
-  blocks: external_exports.array(BlockSchema).min(1).describe("\u6309\u987A\u5E8F\u6E32\u67D3\u7684\u58F0\u660E\u5F0F\u7EC4\u4EF6\u5757\u5217\u8868")
+  blocks: external_exports.array(BlockSchema).min(1).describe("\u6309\u987A\u5E8F\u6E32\u67D3\u7684\u58F0\u660E\u5F0F\u7EC4\u4EF6\u5757\u5217\u8868\uFF08\u652F\u6301 13 \u79CD\u79EF\u6728\uFF09"),
+  commentable: external_exports.boolean().optional().describe("\u5361\u7247\u7EA7\u9ED8\u8BA4\u6279\u6CE8\u5F00\u5173"),
+  allowCustomInput: external_exports.boolean().optional().describe("\u662F\u5426\u5728\u5361\u7247\u5E95\u90E8\u63D0\u4F9B\u81EA\u7531\u8865\u5145\u53CD\u9988\u8F93\u5165\u6846")
 };
 var OptionalWalkthroughInputShape = {
-  title: external_exports.string().min(1).optional().describe("\u53EF\u9009\u5361\u7247\u6807\u9898\uFF0C\u4E0D\u4F20\u65F6\u590D\u7528\u6700\u8FD1\u4E00\u6B21\u6216\u5C55\u793A\u793A\u4F8B"),
+  title: external_exports.string().min(1).optional().describe("\u53EF\u9009\u5361\u7247\u6807\u9898\uFF0C\u4E0D\u4F20\u65F6\u590D\u7528\u6700\u8FD1\u4E00\u6B21\u5386\u53F2\u5361\u7247\u6216\u5C55\u793A\u793A\u4F8B"),
   subtitle: external_exports.string().optional(),
   mermaid: external_exports.string().optional(),
+  nodeDetails: external_exports.record(external_exports.string(), MermaidNodeDetailSchema).optional(),
   steps: external_exports.array(StepItemSchema).optional(),
   codeBlocks: external_exports.array(CodeBlockSchema).optional(),
-  notes: external_exports.array(external_exports.string()).optional()
+  notes: external_exports.array(external_exports.string()).optional(),
+  commentable: external_exports.boolean().optional(),
+  allowCustomInput: external_exports.boolean().optional()
 };
-var DEFAULT_DEMO_PAYLOAD = {
-  kind: "walkthrough",
-  title: "Logic Walkthrough \u903B\u8F91\u8BB2\u89E3\u9762\u677F\uFF08\u793A\u4F8B\uFF09",
-  subtitle: "\u5728\u5BF9\u8BDD\u4E2D\u8C03\u7528 render_logic_walkthrough \u6216 render_ui_card \u540E\uFF0C\u6B64\u5904\u4F1A\u81EA\u52A8\u66F4\u65B0\u4E3A\u771F\u5B9E\u5361\u7247",
-  mermaid: [
-    "flowchart LR",
-    '  A["1. \u63A5\u6536\u8F93\u5165\u53C2\u6570"] --> B["2. \u6821\u9A8C\u4E0E\u89C4\u8303\u5316<br/>normalizePayload"]',
-    '  B --> C["3. \u6E32\u67D3 Mermaid \u6D41\u7A0B\u56FE"]',
-    '  C --> D["4. \u8F93\u51FA\u6B65\u9AA4\u4E0E\u6298\u53E0\u6E90\u7801"]'
-  ].join("\n"),
-  steps: [
-    {
-      number: 1,
-      title: "Step 1: \u91C7\u96C6\u771F\u5B9E\u4EE3\u7801\u4E0E\u884C\u53F7",
-      description: "\u5148\u901A\u8FC7\u53EA\u8BFB\u5DE5\u5177\u6838\u5B9E\u6587\u4EF6\u8DEF\u5F84\u4E0E\u8D77\u6B62\u884C\u53F7\uFF0C\u63D0\u70BC\u5173\u952E\u51FD\u6570\u5982 `normalizePayload`\uFF0C\u786E\u4FDD\u6BCF\u6761\u5F15\u7528\u771F\u5B9E\u5B58\u5728\u3002",
-      fileRef: "server/src/server.ts"
-    },
-    {
-      number: 2,
-      title: "Step 2: \u6E32\u67D3\u53EF\u7F29\u653E\u6D41\u7A0B\u56FE",
-      description: "\u652F\u6301\u53F3\u4E0A\u89D2 `-` / `100%` / `+` \u7F29\u653E\u3001\u9F20\u6807\u62D6\u62FD\u5E73\u79FB\u3001`Mermaid` \u67E5\u770B\u6E90\u7801\u53CA\u5168\u5C4F\u5C55\u5F00\u3002"
-    },
-    {
-      number: 3,
-      title: "Step 3: \u4FA7\u680F\u8054\u52A8\u4E0E\u6298\u53E0\u6E90\u7801",
-      description: "\u70B9\u51FB\u5E26\u771F\u5B9E `file://` URI \u7684\u6587\u4EF6\u5F15\u7528\u53EF\u76F4\u63A5\u5728\u4FA7\u680F\u6253\u5F00\u5BF9\u5E94\u6587\u4EF6\uFF0C\u6298\u53E0\u4EE3\u7801\u533A\u652F\u6301\u590D\u5236\u4E0E\u771F\u5B9E\u884C\u53F7\u5BF9\u9F50\u3002"
-    }
-  ],
-  codeBlocks: [
-    {
-      title: "\u793A\u4F8B\u5165\u53E3\u4EE3\u7801 (server.ts)",
-      fileRef: "server/src/server.ts",
-      language: "typescript",
-      startLine: 1,
-      defaultOpen: true,
-      code: [
-        "export function normalizeWalkthrough(raw: RawInput): NormalizedWalkthrough {",
-        "  // 1. \u8865\u5168\u6B65\u9AA4\u5E8F\u53F7\u4E0E\u4EE3\u7801\u5757\u8D77\u59CB\u884C\u53F7",
-        "  // 2. \u9650\u5236\u5355\u6B21\u8FD4\u56DE\u4F53\u79EF\u5728 750 KiB \u4EE5\u5185",
-        "  return enforcePayloadBudget(raw);",
-        "}"
-      ].join("\n")
-    }
-  ],
-  notes: ["\u63D0\u793A\uFF1A\u8FD9\u662F\u4E00\u4E2A\u5360\u4F4D\u793A\u4F8B\u3002\u8BF7\u8BA9 AI \u5206\u6790\u5177\u4F53\u4EE3\u7801\u540E\u8C03\u7528 render_logic_walkthrough \u6216 render_ui_card\u3002"]
+var AppGetCardInputShape = {
+  cardId: external_exports.string().min(1).describe("\u8981\u8BFB\u53D6\u7684\u5386\u53F2\u5361\u7247 ID \u6216\u5185\u7F6E Gallery \u793A\u4F8B ID\uFF08gallery:*\uFF09")
 };
-var latestPayload = null;
+var AppSaveDraftInputShape = {
+  cardId: external_exports.string().min(1),
+  queued: external_exports.array(
+    external_exports.object({
+      key: external_exports.string().min(1),
+      label: external_exports.string(),
+      text: external_exports.string()
+    })
+  ).max(50),
+  comments: external_exports.record(
+    external_exports.string(),
+    external_exports.object({
+      label: external_exports.string(),
+      text: external_exports.string()
+    })
+  ),
+  customNote: external_exports.string().max(4e3)
+};
+
+// src/budget.ts
+var MAX_PAYLOAD_BYTES = 750 * 1024;
 function measureJsonBytes(data) {
   return Buffer.byteLength(JSON.stringify(data), "utf-8");
 }
-function truncateCodeText(code, maxLines = 40, maxChars = 4e3) {
-  const lines = code.split("\n");
+function truncateMultilineText(text, maxLines = 40, maxChars = 4e3, suffix = "// ...\uFF08\u5185\u5BB9\u8FC7\u957F\u5DF2\u6309\u8F68\u8FF9\u4F53\u79EF\u9650\u5236\u622A\u65AD\uFF0C\u70B9\u51FB\u4E0A\u65B9\u6587\u4EF6\u8DEF\u5F84\u53EF\u5728\u4FA7\u680F\u67E5\u770B\u5B8C\u6574\u6587\u4EF6\uFF09") {
+  const lines = text.split("\n");
   if (lines.length > maxLines) {
-    return lines.slice(0, maxLines).join("\n") + "\n// ...\uFF08\u6E90\u7801\u8FC7\u957F\u5DF2\u6309\u8F68\u8FF9\u4F53\u79EF\u9650\u5236\u622A\u65AD\uFF0C\u70B9\u51FB\u4E0A\u65B9\u6587\u4EF6\u8DEF\u5F84\u53EF\u5728\u4FA7\u680F\u67E5\u770B\u5B8C\u6574\u6587\u4EF6\uFF09";
+    return `${lines.slice(0, maxLines).join("\n")}
+${suffix}`;
   }
-  if (code.length > maxChars) {
-    return code.slice(0, maxChars) + "\n// ...\uFF08\u5DF2\u622A\u65AD\uFF09";
+  if (text.length > maxChars) {
+    return `${text.slice(0, maxChars)}
+${suffix}`;
   }
-  return code;
+  return text;
 }
-function enforceWalkthroughBudget(payload) {
-  if (measureJsonBytes(payload) <= MAX_PAYLOAD_BYTES) {
+function cloneLeafBlock(block) {
+  if (block.type === "findings") {
+    return { ...block, items: block.items.map((item) => ({ ...item })) };
+  }
+  if (block.type === "plan") {
+    return { ...block, steps: block.steps.map((step) => ({ ...step })) };
+  }
+  if (block.type === "steps") {
+    return { ...block, items: block.items.map((item) => ({ ...item })) };
+  }
+  if (block.type === "table") {
+    return { ...block, rows: block.rows.map((row) => [...row]) };
+  }
+  return { ...block };
+}
+function cloneBlock(block) {
+  if (block.type === "tabs") {
+    return {
+      ...block,
+      tabs: block.tabs.map((tab) => ({
+        ...tab,
+        blocks: tab.blocks.map(cloneLeafBlock)
+      }))
+    };
+  }
+  return cloneLeafBlock(block);
+}
+function shrinkLeafBlock(block, aggressive) {
+  const maxLines = aggressive ? 16 : 40;
+  const maxChars = aggressive ? 1200 : 4e3;
+  if (block.type === "code") {
+    const next = truncateMultilineText(block.code, maxLines, maxChars);
+    if (next !== block.code) {
+      block.code = next;
+      return true;
+    }
+    return false;
+  }
+  if (block.type === "diff") {
+    const next = truncateMultilineText(
+      block.patch,
+      aggressive ? 24 : 60,
+      aggressive ? 1600 : 5e3,
+      "...\uFF08Diff \u8FC7\u957F\u5DF2\u6309\u8F68\u8FF9\u4F53\u79EF\u9650\u5236\u622A\u65AD\uFF09"
+    );
+    if (next !== block.patch) {
+      block.patch = next;
+      return true;
+    }
+    return false;
+  }
+  if (block.type === "findings") {
+    let changed = false;
+    for (const item of block.items) {
+      if (item.fix) {
+        const nextFix = truncateMultilineText(
+          item.fix,
+          aggressive ? 10 : 25,
+          aggressive ? 800 : 2e3,
+          "// ...\uFF08\u4FEE\u590D\u4EE3\u7801\u5DF2\u622A\u65AD\uFF09"
+        );
+        if (nextFix !== item.fix) {
+          item.fix = nextFix;
+          changed = true;
+        }
+      }
+      if (aggressive && item.detail && item.detail.length > 500) {
+        item.detail = `${item.detail.slice(0, 500)}\u2026`;
+        changed = true;
+      }
+    }
+    return changed;
+  }
+  if (block.type === "text" && block.content.length > maxChars) {
+    block.content = `${block.content.slice(0, maxChars)}
+\u2026\uFF08\u6B63\u6587\u5DF2\u6309\u4F53\u79EF\u9650\u5236\u7CBE\u7B80\uFF09`;
+    return true;
+  }
+  if (block.type === "callout" && block.text.length > maxChars) {
+    block.text = `${block.text.slice(0, maxChars)}
+\u2026\uFF08\u63D0\u793A\u5185\u5BB9\u5DF2\u7CBE\u7B80\uFF09`;
+    return true;
+  }
+  if (aggressive && block.type === "table" && block.rows.length > 20) {
+    block.rows = block.rows.slice(0, 20);
+    return true;
+  }
+  return false;
+}
+function collectLeafBlocks(blocks) {
+  const out = [];
+  for (const block of blocks) {
+    if (block.type === "tabs") {
+      for (const tab of block.tabs) {
+        out.push(...tab.blocks);
+      }
+    } else {
+      out.push(block);
+    }
+  }
+  return out;
+}
+function enforceWalkthroughBudget(payload, maxBytes = MAX_PAYLOAD_BYTES) {
+  if (measureJsonBytes(payload) <= maxBytes) {
     return payload;
   }
   const trimmed = {
     ...payload,
     codeBlocks: payload.codeBlocks.map((block) => ({ ...block })),
+    notes: [...payload.notes],
     truncated: true
   };
-  for (let i = trimmed.codeBlocks.length - 1; i >= 0 && measureJsonBytes(trimmed) > MAX_PAYLOAD_BYTES; i--) {
-    trimmed.codeBlocks[i].code = truncateCodeText(trimmed.codeBlocks[i].code);
+  for (let i = trimmed.codeBlocks.length - 1; i >= 0 && measureJsonBytes(trimmed) > maxBytes; i--) {
+    trimmed.codeBlocks[i].code = truncateMultilineText(trimmed.codeBlocks[i].code);
   }
-  if (measureJsonBytes(trimmed) > MAX_PAYLOAD_BYTES) {
-    trimmed.notes = [
-      ...trimmed.notes,
-      "\u90E8\u5206\u8D85\u957F\u4EE3\u7801\u5185\u5BB9\u5DF2\u81EA\u52A8\u7CBE\u7B80\uFF0C\u4EE5\u7B26\u5408\u5355\u6B21\u5DE5\u5177\u7ED3\u679C\u4F53\u79EF\u9650\u5236\u3002"
-    ];
-    while (trimmed.codeBlocks.length > 1 && measureJsonBytes(trimmed) > MAX_PAYLOAD_BYTES) {
+  if (measureJsonBytes(trimmed) > maxBytes) {
+    for (let i = trimmed.codeBlocks.length - 1; i >= 0 && measureJsonBytes(trimmed) > maxBytes; i--) {
+      trimmed.codeBlocks[i].code = truncateMultilineText(trimmed.codeBlocks[i].code, 12, 800);
+    }
+  }
+  if (measureJsonBytes(trimmed) > maxBytes) {
+    while (trimmed.codeBlocks.length > 1 && measureJsonBytes(trimmed) > maxBytes) {
       trimmed.codeBlocks.pop();
     }
+    trimmed.notes.push("\u90E8\u5206\u8D85\u957F\u4EE3\u7801\u5185\u5BB9\u5DF2\u81EA\u52A8\u7CBE\u7B80\uFF0C\u4EE5\u7B26\u5408 Antigravity \u5355\u6B21\u5DE5\u5177\u7ED3\u679C 1 MiB \u4F53\u79EF\u4E0A\u9650\u3002");
   }
   return trimmed;
 }
-function enforceUiCardBudget(payload) {
-  if (measureJsonBytes(payload) <= MAX_PAYLOAD_BYTES) {
+function enforceUiCardBudget(payload, maxBytes = MAX_PAYLOAD_BYTES) {
+  if (measureJsonBytes(payload) <= maxBytes) {
     return payload;
   }
   const trimmed = {
     ...payload,
-    blocks: payload.blocks.map((block) => ({ ...block })),
+    blocks: payload.blocks.map(cloneBlock),
     truncated: true
   };
-  for (let i = trimmed.blocks.length - 1; i >= 0 && measureJsonBytes(trimmed) > MAX_PAYLOAD_BYTES; i--) {
-    const block = trimmed.blocks[i];
-    if (block.type === "code") {
-      trimmed.blocks[i] = {
-        ...block,
-        code: truncateCodeText(block.code)
-      };
+  const leaves = collectLeafBlocks(trimmed.blocks);
+  for (let i = leaves.length - 1; i >= 0 && measureJsonBytes(trimmed) > maxBytes; i--) {
+    shrinkLeafBlock(leaves[i], false);
+  }
+  if (measureJsonBytes(trimmed) > maxBytes) {
+    for (let i = leaves.length - 1; i >= 0 && measureJsonBytes(trimmed) > maxBytes; i--) {
+      shrinkLeafBlock(leaves[i], true);
     }
   }
-  if (measureJsonBytes(trimmed) > MAX_PAYLOAD_BYTES) {
-    trimmed.blocks.push({
-      type: "callout",
-      tone: "info",
-      title: "\u4F53\u79EF\u4FDD\u62A4\u63D0\u793A",
-      text: "\u90E8\u5206\u8D85\u957F\u4EE3\u7801\u5757\u5DF2\u6309\u5355\u6B21\u5DE5\u5177\u7ED3\u679C\u4F53\u79EF\u9650\u5236\u81EA\u52A8\u7CBE\u7B80\u3002"
-    });
+  const noticeBlock = {
+    type: "callout",
+    tone: "info",
+    title: "\u4F53\u79EF\u4FDD\u62A4\u63D0\u793A",
+    text: "\u90E8\u5206\u8D85\u957F\u4EE3\u7801\u6216 Diff \u5185\u5BB9\u5DF2\u6309 Antigravity \u5355\u6B21\u5DE5\u5177\u7ED3\u679C\u4F53\u79EF\u4E0A\u9650\u81EA\u52A8\u7CBE\u7B80\u3002"
+  };
+  if (measureJsonBytes({ ...trimmed, blocks: [...trimmed.blocks, noticeBlock] }) <= maxBytes) {
+    trimmed.blocks.push(noticeBlock);
   }
   return trimmed;
+}
+
+// src/gallery.ts
+var DEFAULT_DEMO_PAYLOAD = {
+  kind: "walkthrough",
+  cardId: "gallery:walkthrough",
+  createdAt: 0,
+  title: "Logic Walkthrough \u903B\u8F91\u8BB2\u89E3\u9762\u677F\uFF08\u793A\u4F8B\uFF09",
+  subtitle: "\u70B9\u51FB\u6D41\u7A0B\u56FE\u8282\u70B9\u53EF\u8054\u52A8\u9AD8\u4EAE\u4E0B\u65B9\u6B65\u9AA4\uFF1B\u771F\u5B9E\u8C03\u7528\u540E\u6B64\u5904\u4F1A\u81EA\u52A8\u4FDD\u7559\u6700\u8FD1 30 \u5F20\u5386\u53F2\u5361\u7247",
+  mermaid: [
+    "flowchart LR",
+    '  A["1. \u63A5\u6536\u53C2\u6570"] --> B["2. \u6821\u9A8C\u4E0E\u88C1\u526A<br/>budget.ts"]',
+    '  B --> C["3. \u8282\u70B9\u8054\u52A8\u6E32\u67D3"]',
+    '  C --> D["4. \u6279\u6CE8\u540C\u6B65 Pill"]'
+  ].join("\n"),
+  nodeDetails: {
+    A: {
+      title: "\u63A5\u6536\u5DE5\u5177\u8F93\u5165",
+      summary: "\u901A\u8FC7\u5F3A\u7C7B\u578B Zod Schema \u6821\u9A8C\u8F93\u5165\uFF0C\u517C\u5BB9\u539F\u6709 7 \u7C7B\u4E0E\u65B0\u589E 6 \u7C7B\u7814\u53D1\u79EF\u6728\u3002",
+      stepNumber: 1,
+      fileRef: "server/src/schema.ts"
+    },
+    B: {
+      title: "\u9012\u5F52\u4F53\u79EF\u9884\u7B97\u4FDD\u62A4",
+      summary: "\u9012\u5F52\u68C0\u67E5 code\u3001diff\u3001findings \u4E0E tabs \u5D4C\u5957\u5757\uFF0C\u4E25\u683C\u63A7\u5236\u5728 750 KiB \u5B89\u5168\u7EBF\u5185\u3002",
+      stepNumber: 2,
+      fileRef: "server/src/budget.ts"
+    },
+    C: {
+      title: "\u6D41\u7A0B\u56FE\u8054\u52A8\u4EA4\u4E92",
+      summary: "\u70B9\u51FB\u4EFB\u610F\u7ED1\u5B9A\u4E86 nodeDetails \u7684\u6D41\u7A0B\u56FE\u8282\u70B9\uFF0C\u76F4\u63A5\u5F39\u51FA\u6458\u8981\u5E76\u5B9A\u4F4D\u5230\u5BF9\u5E94\u6B65\u9AA4\u3002",
+      stepNumber: 3
+    },
+    D: {
+      title: "\u53CC\u5411\u6279\u6CE8\u4E0E Context Pill",
+      summary: "\u7528\u6237\u52FE\u9009\u6216\u6DFB\u52A0\u884C\u5185\u6279\u6CE8\u540E\uFF0C\u901A\u8FC7\u5B98\u65B9 updateModelContext() \u540C\u6B65\u5230\u8F93\u5165\u6846 Pill\u3002",
+      stepNumber: 4
+    }
+  },
+  steps: [
+    {
+      number: 1,
+      title: "Step 1: \u91C7\u96C6\u771F\u5B9E\u6E90\u7801\u4E0E\u884C\u53F7",
+      description: "\u5148\u901A\u8FC7\u53EA\u8BFB\u5DE5\u5177\u6838\u5B9E\u771F\u5B9E\u8DEF\u5F84\u4E0E\u8D77\u6B62\u884C\u53F7\uFF0C\u63D0\u70BC\u5173\u952E\u5165\u53E3\u5982 `normalizeUiCard`\uFF0C\u7EDD\u4E0D\u865A\u6784\u884C\u53F7\u3002",
+      fileRef: "server/src/server.ts"
+    },
+    {
+      number: 2,
+      title: "Step 2: \u9012\u5F52\u4F53\u79EF\u4FDD\u62A4\u4E0E\u6301\u4E45\u5316",
+      description: "\u7531 `enforceUiCardBudget` \u63A7\u5236\u8FD4\u56DE\u4F53\u91CF\u8FDC\u4F4E\u4E8E 1 MiB \u4E0A\u9650\uFF0C\u5E76\u5199\u5165 `${PLUGIN_DATA}` \u4FDD\u7559\u5386\u53F2\u3002",
+      fileRef: "server/src/budget.ts"
+    },
+    {
+      number: 3,
+      title: "Step 3: \u8282\u70B9\u8054\u52A8\u63A2\u7D22",
+      description: "\u70B9\u51FB\u4E0A\u65B9\u6D41\u7A0B\u56FE\u4EFB\u610F\u8282\u70B9\u5373\u53EF\u5C55\u5F00\u8BF4\u660E\u5E76\u81EA\u52A8\u5B9A\u4F4D\u9AD8\u4EAE\u672C\u6B65\u9AA4\uFF1B\u4E5F\u53EF\u5728\u4FA7\u680F\u67E5\u770B\u5B8C\u6574\u6587\u4EF6\u3002"
+    },
+    {
+      number: 4,
+      title: "Step 4: \u884C\u5185\u6279\u6CE8\u4E0E\u6682\u5B58\u53D1\u9001",
+      description: "\u70B9\u51FB\u672C\u6B65\u9AA4\u53F3\u4FA7\u300C\u6279\u6CE8\u300D\u8F93\u5165\u4FEE\u6539\u610F\u89C1\uFF0C\u5C06\u5B9E\u65F6\u540C\u6B65\u5230 Antigravity \u8F93\u5165\u6846\u4E0A\u4E0B\u6587 Pill\uFF0C\u6216\u5E95\u90E8\u4E00\u952E\u53D1\u9001\u3002"
+    }
+  ],
+  codeBlocks: [
+    {
+      title: "\u9012\u5F52\u4F53\u79EF\u4FDD\u62A4\u793A\u4F8B (budget.ts)",
+      fileRef: "server/src/budget.ts",
+      language: "typescript",
+      startLine: 1,
+      defaultOpen: true,
+      code: [
+        "export function enforceUiCardBudget(payload: NormalizedUiCard): NormalizedUiCard {",
+        "  if (measureJsonBytes(payload) <= MAX_PAYLOAD_BYTES) return payload;",
+        "  // \u9012\u5F52\u8986\u76D6 code\u3001diff\u3001findings.fix \u4EE5\u53CA tabs \u5185\u5D4C\u5957\u79EF\u6728",
+        "  return trimNestedBlocks(payload);",
+        "}"
+      ].join("\n")
+    }
+  ],
+  notes: ["\u63D0\u793A\uFF1A\u53EF\u5728\u4E0A\u65B9\u4E0B\u62C9\u680F\u5207\u6362\u5386\u53F2\u5361\u7247\u6216\u6D4F\u89C8\u300C\u7EC4\u4EF6\u793A\u4F8B\uFF08Mini Gallery\uFF09\u300D\u3002"],
+  commentable: true,
+  allowCustomInput: true
+};
+var MINI_GALLERY = [
+  {
+    id: "gallery:walkthrough",
+    label: "\u793A\u4F8B \xB7 \u903B\u8F91\u8BB2\u89E3\uFF08\u8282\u70B9\u8054\u52A8\uFF09",
+    description: "Mermaid \u8282\u70B9\u70B9\u51FB\u8054\u52A8\u6B65\u9AA4 + \u6298\u53E0\u6E90\u7801 + \u884C\u5185\u6279\u6CE8",
+    payload: DEFAULT_DEMO_PAYLOAD
+  },
+  {
+    id: "gallery:review",
+    label: "\u793A\u4F8B \xB7 Code Review\uFF08Findings + Diff + Tabs\uFF09",
+    description: "\u6307\u6807\u6761 + \u6807\u7B7E\u9875\u9632 800px \u6EA2\u51FA + \u4E25\u91CD\u5EA6\u7B5B\u9009\u4E0E\u4FEE\u590D Diff",
+    payload: {
+      kind: "ui_card",
+      cardId: "gallery:review",
+      createdAt: 0,
+      title: "Code Review\uFF1A\u8BA4\u8BC1\u4E0E\u4E0A\u4F20\u6A21\u5757\u6392\u67E5",
+      subtitle: "\u6F14\u793A metrics + tabs + findings + diff + \u53CC\u5411\u6279\u6CE8\u6C47\u603B",
+      commentable: true,
+      allowCustomInput: true,
+      blocks: [
+        {
+          type: "metrics",
+          items: [
+            { label: "\u53D1\u73B0\u95EE\u9898", value: "3 \u9879", tone: "warn" },
+            { label: "\u9AD8\u5371\u963B\u65AD", value: "1 \u9879", delta: "\u5FC5\u987B\u4FEE\u590D", tone: "bad" },
+            { label: "\u5EFA\u8BAE\u91CD\u6784", value: "2 \u9879", tone: "info" },
+            { label: "\u5355\u6D4B\u901A\u8FC7", value: "98%", delta: "+2.4%", tone: "good" }
+          ]
+        },
+        {
+          type: "tabs",
+          defaultTab: "findings",
+          tabs: [
+            {
+              id: "findings",
+              label: "\u95EE\u9898\u6E05\u5355",
+              badge: "3",
+              blocks: [
+                {
+                  type: "findings",
+                  selectable: true,
+                  commentable: true,
+                  submitLabel: "\u4FEE\u590D\u5DF2\u52FE\u9009\u95EE\u9898",
+                  items: [
+                    {
+                      id: "f1",
+                      severity: "high",
+                      title: "\u7A7A\u90AE\u7BB1\u89E6\u53D1 toLowerCase \u8FD0\u884C\u65F6\u5F02\u5E38",
+                      fileRef: "src/api/users.ts:41",
+                      rule: "null-safety",
+                      detail: "SSO \u9996\u6B21\u767B\u5F55\u56DE\u8C03\u672A\u4FDD\u8BC1 `user.email` \u975E\u7A7A\uFF0C\u76F4\u63A5\u8C03\u7528\u4F1A\u629B\u51FA TypeError\u3002",
+                      fixIsDiff: true,
+                      fix: [
+                        "@@ -40,3 +40,3 @@",
+                        " export function normalizeEmail(user: User) {",
+                        "-  return user.email.toLowerCase();",
+                        '+  return (user.email ?? "").trim().toLowerCase();',
+                        " }"
+                      ].join("\n"),
+                      defaultSelected: true
+                    },
+                    {
+                      id: "f2",
+                      severity: "medium",
+                      title: "\u91CD\u8BD5\u961F\u5217\u4E22\u5931\u8BF7\u6C42\u5143\u6570\u636E",
+                      fileRef: "src/worker/queue.ts:88",
+                      detail: "`requeue()` \u4EC5\u91CD\u63A8\u4EFB\u52A1 ID\uFF0C\u5BFC\u81F4\u91CD\u8BD5\u9636\u6BB5 traceId \u4E22\u5931\u3002",
+                      defaultSelected: true
+                    },
+                    {
+                      id: "f3",
+                      severity: "info",
+                      title: "\u53EF\u5408\u5E76\u91CD\u590D\u7684\u72B6\u6001\u626B\u63CF\u5FAA\u73AF",
+                      fileRef: "src/worker/stats.ts:19",
+                      detail: "\u5F53\u524D\u6570\u636E\u91CF\u4E0B\u65E0\u6027\u80FD\u74F6\u9888\uFF0C\u53EF\u5728\u540E\u7EED\u91CD\u6784\u65F6\u7EDF\u4E00\u6536\u96C6\u3002"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              id: "patch",
+              label: "\u5EFA\u8BAE\u8865\u4E01 Diff",
+              blocks: [
+                {
+                  type: "diff",
+                  title: "\u4FEE\u590D\u7A7A\u90AE\u7BB1\u4E0E\u53BB\u7A7A\u767D",
+                  fileRef: "src/api/users.ts",
+                  defaultOpen: true,
+                  patch: [
+                    "--- a/src/api/users.ts",
+                    "+++ b/src/api/users.ts",
+                    "@@ -39,5 +39,6 @@",
+                    " export function normalizeEmail(user: User) {",
+                    "-  return user.email.toLowerCase();",
+                    '+  const raw = user.email ?? "";',
+                    "+  return raw.trim().toLowerCase();",
+                    " }"
+                  ].join("\n")
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: "gallery:plan",
+    label: "\u793A\u4F8B \xB7 \u5B9E\u65BD\u8BA1\u5212\u5BA1\u6279\uFF08Plan + Queue\uFF09",
+    description: "\u5E26\u98CE\u9669\u5FBD\u7AE0\u3001\u53EF\u9009\u6B65\u9AA4\u52FE\u9009\u3001\u884C\u5185\u6279\u6CE8\u4E0E\u4E00\u952E\u6279\u51C6",
+    payload: {
+      kind: "ui_card",
+      cardId: "gallery:plan",
+      createdAt: 0,
+      title: "\u9650\u6D41\u6539\u9020\u5B9E\u65BD\u8BA1\u5212",
+      subtitle: "\u53EF\u53D6\u6D88\u52FE\u9009\u53EF\u9009\u6B65\u9AA4\u3001\u5BF9\u4EFB\u610F\u6B65\u9AA4\u6DFB\u52A0\u6279\u6CE8\u540E\u518D\u7EDF\u4E00\u6279\u51C6",
+      allowCustomInput: true,
+      blocks: [
+        {
+          type: "plan",
+          commentable: true,
+          submitLabel: "\u6279\u51C6\u5E76\u6267\u884C\u5DF2\u52FE\u9009\u6B65\u9AA4",
+          steps: [
+            {
+              id: "p1",
+              title: "\u89E3\u6790\u4E0A\u6E38 429 \u4E0E Retry-After \u54CD\u5E94\u5934",
+              detail: "\u7EDF\u4E00\u5C01\u88C5\u9000\u907F\u7B49\u5F85\uFF0C\u5355\u6B21\u4E0A\u9650 60s\uFF1B\u5176\u4F59 4xx \u4FDD\u6301\u539F\u6837\u900F\u4F20\u3002",
+              files: [{ fileRef: "src/net/http.ts:180" }],
+              risk: "medium",
+              estimate: "1h"
+            },
+            {
+              id: "p2",
+              title: "\u66FF\u6362\u4E3A\u6309 Host \u9694\u79BB\u7684\u4EE4\u724C\u6876\u9650\u6D41\u5668",
+              detail: "\u907F\u514D\u5355\u4E2A\u6162\u4E0A\u6E38\u62D6\u57AE\u5176\u4F59\u5E76\u53D1\u8BF7\u6C42\u3002",
+              files: [{ fileRef: "src/net/limiter.ts" }],
+              risk: "high",
+              estimate: "2h"
+            },
+            {
+              id: "p3",
+              title: "\u5728\u72B6\u6001\u680F\u5C55\u793A\u300C\u9650\u6D41\u91CD\u8BD5\u4E2D\u300D\u5FAE\u63D0\u793A",
+              detail: "\u63D0\u5347\u5F31\u7F51\u4F53\u9A8C\uFF0C\u53EF\u4F5C\u4E3A\u53EF\u9009\u589E\u5F3A\u9879\u3002",
+              files: [{ fileRef: "src/ui/statusBar.ts" }],
+              risk: "low",
+              estimate: "30m",
+              optional: true,
+              defaultChecked: false
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    id: "gallery:decision",
+    label: "\u793A\u4F8B \xB7 \u65B9\u6848\u52A0\u6743\u5BF9\u6BD4\uFF08Decision\uFF09",
+    description: "\u672C\u5730\u62D6\u52A8\u7EF4\u5EA6\u6743\u91CD\u6ED1\u5757\u5B9E\u65F6\u91CD\u7B97\u6392\u5E8F\uFF08\u96F6 LLM \u8C03\u7528\uFF09",
+    payload: {
+      kind: "ui_card",
+      cardId: "gallery:decision",
+      createdAt: 0,
+      title: "\u5F02\u6B65\u4EFB\u52A1\u961F\u5217\u6280\u672F\u9009\u578B",
+      subtitle: "\u62D6\u52A8\u5404\u7EF4\u5EA6\u6743\u91CD\u6ED1\u5757\u53EF\u5B9E\u65F6\u91CD\u6392\u7EFC\u5408\u5F97\u5206",
+      blocks: [
+        {
+          type: "decision",
+          submitLabel: "\u91C7\u7528\u5F53\u524D\u9996\u9009\u65B9\u6848",
+          criteria: [
+            { name: "\u541E\u5410\u80FD\u529B", weight: 2, note: "\u5CF0\u503C\u7EA6 40 jobs/s" },
+            { name: "\u8FD0\u7EF4\u6210\u672C", weight: 4, note: "\u5C0F\u56E2\u961F\u4F18\u5148\u5C11\u7EC4\u4EF6" },
+            { name: "\u4E8B\u52A1\u4E00\u81F4\u6027", weight: 3 }
+          ],
+          options: [
+            {
+              name: "pg-boss",
+              scores: [4, 5, 5],
+              recommended: true,
+              pros: ["\u76F4\u63A5\u590D\u7528\u73B0\u6709 Postgres", "\u4E0E\u4E1A\u52A1\u884C\u5728\u540C\u4E00\u4E8B\u52A1\u63D0\u4EA4"],
+              cons: ["\u6781\u9AD8\u541E\u5410\u4E0B\u8F6E\u8BE2\u5B58\u5728\u989D\u5916\u8D1F\u8F7D"],
+              actionText: "\u91C7\u7528 pg-boss \u65B9\u6848\u63A5\u5165\u5F02\u6B65\u4EFB\u52A1\u961F\u5217\uFF0C\u590D\u7528\u73B0\u6709 Postgres\u3002"
+            },
+            {
+              name: "BullMQ",
+              scores: [5, 2, 3],
+              pros: ["\u5EF6\u8FDF\u6781\u4F4E\uFF0C\u539F\u751F\u9650\u6D41\u4E0E\u5EF6\u8FDF\u961F\u5217\u5B8C\u5584"],
+              cons: ["\u9700\u8981\u72EC\u7ACB\u7EF4\u62A4\u6301\u4E45\u5316 Redis"],
+              actionText: "\u91C7\u7528 BullMQ + Redis \u65B9\u6848\u5B9E\u73B0\u5F02\u6B65\u4EFB\u52A1\u961F\u5217\u3002"
+            }
+          ]
+        },
+        {
+          type: "actions",
+          buttons: [
+            {
+              label: "\u6682\u5B58\uFF1A\u5148\u8865\u538B\u6D4B\u6570\u636E",
+              variant: "secondary",
+              action: {
+                type: "queue",
+                label: "\u8865\u5145\u538B\u6D4B",
+                text: "\u5728\u6700\u7EC8\u5B9A\u578B\u524D\uFF0C\u8BF7\u5148\u8865\u5145 pg-boss \u4E0E BullMQ \u7684\u672C\u5730\u538B\u6D4B\u5BF9\u6BD4\u811A\u672C\u3002"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+];
+function findGalleryPayload(cardId) {
+  return MINI_GALLERY.find((item) => item.id === cardId)?.payload ?? null;
+}
+
+// src/storage.ts
+import fs from "node:fs/promises";
+import path from "node:path";
+var MAX_HISTORY_ITEMS = 30;
+var MAX_DRAFT_ITEMS = 40;
+function stripTransientFields(payload) {
+  const copy = { ...payload };
+  delete copy.history;
+  delete copy.draft;
+  delete copy.surfaceHint;
+  return copy;
+}
+var PluginStorage = class {
+  dataDir;
+  initialized = false;
+  history = [];
+  drafts = {};
+  writeQueue = Promise.resolve();
+  constructor(dataDir) {
+    const trimmed = dataDir?.trim();
+    this.dataDir = trimmed ? path.resolve(trimmed) : null;
+  }
+  get persistent() {
+    return this.dataDir !== null;
+  }
+  get historyPath() {
+    return this.dataDir ? path.join(this.dataDir, "history.json") : null;
+  }
+  get draftsPath() {
+    return this.dataDir ? path.join(this.dataDir, "drafts.json") : null;
+  }
+  async init() {
+    if (this.initialized) return;
+    this.initialized = true;
+    if (!this.dataDir) return;
+    try {
+      await fs.mkdir(this.dataDir, { recursive: true });
+      const [hRaw, dRaw] = await Promise.all([
+        this.readJsonSafe(this.historyPath),
+        this.readJsonSafe(this.draftsPath)
+      ]);
+      if (hRaw && Array.isArray(hRaw.items)) {
+        this.history = hRaw.items.filter((item) => Boolean(item && typeof item.cardId === "string" && typeof item.title === "string")).slice(0, MAX_HISTORY_ITEMS);
+      }
+      if (dRaw && dRaw.drafts && typeof dRaw.drafts === "object") {
+        this.drafts = dRaw.drafts;
+      }
+    } catch {
+    }
+  }
+  async readJsonSafe(filePath) {
+    try {
+      const content = await fs.readFile(filePath, "utf-8");
+      return JSON.parse(content);
+    } catch {
+      return null;
+    }
+  }
+  async writeJsonAtomic(filePath, data) {
+    const dir = path.dirname(filePath);
+    await fs.mkdir(dir, { recursive: true });
+    const tmp = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+    await fs.writeFile(tmp, JSON.stringify(data, null, 2), { encoding: "utf-8", mode: 384 });
+    await fs.rename(tmp, filePath);
+  }
+  enqueuePersist(task) {
+    if (!this.dataDir) return Promise.resolve();
+    this.writeQueue = this.writeQueue.then(task).catch(() => {
+    });
+    return this.writeQueue;
+  }
+  async saveCard(payload) {
+    await this.init();
+    const clean = stripTransientFields(payload);
+    this.history = [
+      clean,
+      ...this.history.filter((item) => item.cardId !== clean.cardId)
+    ].slice(0, MAX_HISTORY_ITEMS);
+    await this.enqueuePersist(async () => {
+      if (!this.historyPath) return;
+      const body = { version: 1, items: this.history };
+      await this.writeJsonAtomic(this.historyPath, body);
+    });
+  }
+  async getLatestCard() {
+    await this.init();
+    const first = this.history[0];
+    if (!first) return null;
+    return this.attachDraft(first);
+  }
+  async getCardById(cardId) {
+    await this.init();
+    const found = this.history.find((item) => item.cardId === cardId);
+    if (!found) return null;
+    return this.attachDraft(found);
+  }
+  async listHistory() {
+    await this.init();
+    return this.history.map((item) => ({
+      cardId: item.cardId,
+      kind: item.kind,
+      title: item.title,
+      subtitle: item.subtitle,
+      createdAt: item.createdAt
+    }));
+  }
+  async saveDraft(draft) {
+    await this.init();
+    const isEmpty = draft.queued.length === 0 && Object.keys(draft.comments).length === 0 && draft.customNote.trim().length === 0;
+    if (isEmpty) {
+      delete this.drafts[draft.cardId];
+    } else {
+      this.drafts[draft.cardId] = draft;
+      const keys = Object.keys(this.drafts);
+      if (keys.length > MAX_DRAFT_ITEMS) {
+        const sorted = keys.sort(
+          (a, b) => (this.drafts[b]?.updatedAt ?? 0) - (this.drafts[a]?.updatedAt ?? 0)
+        );
+        for (const staleKey of sorted.slice(MAX_DRAFT_ITEMS)) {
+          delete this.drafts[staleKey];
+        }
+      }
+    }
+    await this.enqueuePersist(async () => {
+      if (!this.draftsPath) return;
+      const body = { version: 1, drafts: this.drafts };
+      await this.writeJsonAtomic(this.draftsPath, body);
+    });
+  }
+  attachDraft(card) {
+    const draft = this.drafts[card.cardId];
+    return draft ? { ...card, draft } : { ...card };
+  }
+};
+function parseDataDirArg(argv) {
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg.startsWith("--data_dir=")) {
+      return arg.slice("--data_dir=".length) || void 0;
+    }
+    if (arg === "--data_dir" && i + 1 < argv.length) {
+      return argv[i + 1] || void 0;
+    }
+  }
+  return process.env.WALKTHROUGH_DATA_DIR || void 0;
+}
+
+// src/server.ts
+var APP_URI = "ui://visual-walkthrough/app.html";
+var PLUGIN_VERSION = "2.0.0";
+var storage = new PluginStorage(parseDataDirArg(process.argv.slice(2)));
+function createCardId(prefix) {
+  const short = crypto.randomBytes(4).toString("hex");
+  return `${prefix}-${Date.now().toString(36)}-${short}`;
+}
+function normalizeLeafBlock(block, codeCounter) {
+  if (block.type === "steps") {
+    return {
+      ...block,
+      items: block.items.map((item, idx) => ({
+        ...item,
+        number: item.number ?? idx + 1
+      }))
+    };
+  }
+  if (block.type === "code") {
+    const defaultOpen = block.defaultOpen ?? codeCounter.count === 0;
+    codeCounter.count += 1;
+    return {
+      ...block,
+      startLine: block.startLine ?? 1,
+      defaultOpen
+    };
+  }
+  if (block.type === "mermaid") {
+    return {
+      ...block,
+      code: block.code.trim()
+    };
+  }
+  if (block.type === "diff") {
+    return {
+      ...block,
+      patch: block.patch.replace(/\r\n/g, "\n"),
+      defaultOpen: block.defaultOpen ?? true
+    };
+  }
+  if (block.type === "findings") {
+    return {
+      ...block,
+      items: block.items.map((item, idx) => ({
+        ...item,
+        id: item.id ?? `finding-${idx + 1}`
+      }))
+    };
+  }
+  if (block.type === "plan") {
+    return {
+      ...block,
+      steps: block.steps.map((step, idx) => ({
+        ...step,
+        id: step.id ?? `step-${idx + 1}`,
+        defaultChecked: step.defaultChecked ?? !step.optional
+      }))
+    };
+  }
+  return block;
 }
 function normalizeWalkthrough(input) {
   const steps = (input.steps ?? []).map((step, index) => ({
@@ -29020,48 +29729,43 @@ function normalizeWalkthrough(input) {
   }));
   return enforceWalkthroughBudget({
     kind: "walkthrough",
+    cardId: createCardId("wt"),
+    createdAt: Date.now(),
     title: input.title,
     subtitle: input.subtitle,
     mermaid: input.mermaid?.trim() || void 0,
+    nodeDetails: input.nodeDetails,
     steps,
     codeBlocks,
-    notes: input.notes ?? []
+    notes: input.notes ?? [],
+    commentable: input.commentable,
+    allowCustomInput: input.allowCustomInput
   });
 }
 function normalizeUiCard(input) {
-  let codeBlockCount = 0;
+  const codeCounter = { count: 0 };
   const blocks = input.blocks.map((block) => {
-    if (block.type === "steps") {
+    if (block.type === "tabs") {
       return {
         ...block,
-        items: block.items.map((item, idx) => ({
-          ...item,
-          number: item.number ?? idx + 1
+        defaultTab: block.defaultTab ?? block.tabs[0]?.id,
+        tabs: block.tabs.map((tab) => ({
+          ...tab,
+          blocks: tab.blocks.map((leaf) => normalizeLeafBlock(leaf, codeCounter))
         }))
       };
     }
-    if (block.type === "code") {
-      const defaultOpen = block.defaultOpen ?? codeBlockCount === 0;
-      codeBlockCount += 1;
-      return {
-        ...block,
-        startLine: block.startLine ?? 1,
-        defaultOpen
-      };
-    }
-    if (block.type === "mermaid") {
-      return {
-        ...block,
-        code: block.code.trim()
-      };
-    }
-    return block;
+    return normalizeLeafBlock(block, codeCounter);
   });
   return enforceUiCardBudget({
     kind: "ui_card",
+    cardId: createCardId("card"),
+    createdAt: Date.now(),
     title: input.title,
     subtitle: input.subtitle,
-    blocks
+    blocks,
+    commentable: input.commentable,
+    allowCustomInput: input.allowCustomInput
   });
 }
 function buildWalkthroughSummary(data) {
@@ -29071,12 +29775,13 @@ function buildWalkthroughSummary(data) {
     `${data.codeBlocks.length} \u6BB5\u53EF\u6298\u53E0\u6E90\u7801`
   ];
   if (data.mermaid) {
-    parts.push("1 \u5F20 Mermaid \u6D41\u7A0B\u56FE");
+    const linked = data.nodeDetails ? Object.keys(data.nodeDetails).length : 0;
+    parts.push(linked > 0 ? `1 \u5F20\u53EF\u4EA4\u4E92 Mermaid \u6D41\u7A0B\u56FE\uFF08${linked} \u4E2A\u8054\u52A8\u8282\u70B9\uFF09` : "1 \u5F20 Mermaid \u6D41\u7A0B\u56FE");
   }
   if (data.truncated) {
-    parts.push("\uFF08\u90E8\u5206\u8D85\u957F\u4EE3\u7801\u5757\u5DF2\u6309\u4F53\u79EF\u9650\u5236\u7CBE\u7B80\uFF09");
+    parts.push("\uFF08\u90E8\u5206\u8D85\u957F\u4EE3\u7801\u5DF2\u6309 1 MiB \u8F68\u8FF9\u9650\u5236\u7CBE\u7B80\uFF09");
   }
-  return parts.join("\uFF0C") + "\u3002";
+  return `${parts.join("\uFF0C")}\u3002`;
 }
 function buildUiCardSummary(data) {
   const blockCounts = /* @__PURE__ */ new Map();
@@ -29084,27 +29789,27 @@ function buildUiCardSummary(data) {
     blockCounts.set(block.type, (blockCounts.get(block.type) ?? 0) + 1);
   }
   const summaryParts = Array.from(blockCounts.entries()).map(([k2, v2]) => `${k2}\xD7${v2}`);
-  return `\u5DF2\u751F\u6210\u58F0\u660E\u5F0F\u4EA4\u4E92\u5361\u7247\uFF1A\u300C${data.title}\u300D\uFF08\u7EC4\u4EF6\uFF1A${summaryParts.join("\u3001")}\uFF09\u3002${data.truncated ? "\uFF08\u90E8\u5206\u8D85\u957F\u4EE3\u7801\u5757\u5DF2\u81EA\u52A8\u7CBE\u7B80\uFF09" : ""}`;
+  return `\u5DF2\u751F\u6210\u58F0\u660E\u5F0F\u4EA4\u4E92\u5361\u7247\uFF1A\u300C${data.title}\u300D\uFF08\u7EC4\u4EF6\uFF1A${summaryParts.join("\u3001")}\uFF09\u3002${data.truncated ? "\uFF08\u90E8\u5206\u8D85\u957F\u5185\u5BB9\u5DF2\u6309\u4F53\u79EF\u9650\u5236\u81EA\u52A8\u7CBE\u7B80\uFF09" : ""}`;
 }
 function buildAnySummary(data) {
   return data.kind === "ui_card" ? buildUiCardSummary(data) : buildWalkthroughSummary(data);
 }
 async function loadAppHtml() {
   const overridePath = process.env.WALKTHROUGH_APP_HTML;
-  const currentDir = path.dirname(fileURLToPath(import.meta.url));
-  const htmlPath = overridePath ? path.resolve(overridePath) : path.resolve(currentDir, "./ui/index.html");
-  return fs.readFile(htmlPath, "utf-8");
+  const currentDir = path2.dirname(fileURLToPath(import.meta.url));
+  const htmlPath = overridePath ? path2.resolve(overridePath) : path2.resolve(currentDir, "./ui/index.html");
+  return fs2.readFile(htmlPath, "utf-8");
 }
 var server = new McpServer({
   name: "visual-walkthrough",
-  version: "1.1.0"
+  version: PLUGIN_VERSION
 });
 N3(
   server,
   "Logic Walkthrough App",
   APP_URI,
   {
-    description: "\u7ED3\u6784\u5316\u6E90\u7801\u903B\u8F91\u8BB2\u89E3\u5361\u7247\u4E0E\u58F0\u660E\u5F0F\u4EA4\u4E92\u5361\u7247\u6E32\u67D3\u5668",
+    description: "\u7ED3\u6784\u5316\u6E90\u7801\u903B\u8F91\u8BB2\u89E3\u5361\u7247\u4E0E\u58F0\u660E\u5F0F\u4EA4\u4E92\u7EC4\u4EF6\u5361\u7247\u6E32\u67D3\u5668",
     mimeType: p,
     _meta: {
       ui: {
@@ -29135,7 +29840,7 @@ K3(
   "render_logic_walkthrough",
   {
     title: "\u6E32\u67D3\u6E90\u7801\u903B\u8F91\u8BB2\u89E3\u5361\u7247",
-    description: "\u5C06\u591A\u6B65\u9AA4\u4E1A\u52A1\u4EE3\u7801\u6216\u6D41\u6C34\u7EBF\u903B\u8F91\u6E32\u67D3\u4E3A\u5E26 Mermaid \u7F29\u653E\u6D41\u7A0B\u56FE\u3001\u7CBE\u51C6\u6B65\u9AA4\u884C\u53F7\u4E0E\u53EF\u6298\u53E0\u6E90\u7801\u7684\u4EA4\u4E92\u5361\u7247\u3002",
+    description: "\u5C06\u591A\u6B65\u9AA4\u4E1A\u52A1\u4EE3\u7801\u6216\u6D41\u6C34\u7EBF\u903B\u8F91\u6E32\u67D3\u4E3A\u5E26 Mermaid \u7F29\u653E\u4E0E\u8282\u70B9\u8054\u52A8\u6D41\u7A0B\u56FE\u3001\u7CBE\u51C6\u6B65\u9AA4\u884C\u53F7\u4E0E\u53EF\u6298\u53E0\u6E90\u7801\u7684\u4EA4\u4E92\u5361\u7247\u3002",
     inputSchema: WalkthroughInputShape,
     _meta: {
       ui: {
@@ -29145,10 +29850,10 @@ K3(
   },
   async (args) => {
     const normalized = normalizeWalkthrough(args);
-    latestPayload = normalized;
+    await storage.saveCard(normalized);
     return {
       content: [{ type: "text", text: buildWalkthroughSummary(normalized) }],
-      structuredContent: normalized
+      structuredContent: { ...normalized, surfaceHint: "inline" }
     };
   }
 );
@@ -29157,7 +29862,7 @@ K3(
   "render_ui_card",
   {
     title: "\u6E32\u67D3\u58F0\u660E\u5F0F\u4EA4\u4E92\u7EC4\u4EF6\u5361\u7247",
-    description: "\u81EA\u7531\u7EC4\u5408\u8868\u683C\uFF08\u542B\u72B6\u6001\u5FBD\u7AE0\uFF09\u3001\u7ED3\u8BBA/\u5EFA\u8BAE\u63D0\u793A\u6846\uFF08Callout\uFF09\u3001Mermaid \u6D41\u7A0B\u56FE\u3001\u6B65\u9AA4\u5217\u8868\u3001\u6298\u53E0\u6E90\u7801\u4EE5\u53CA\u53EF\u89E6\u53D1 Send \u5BF9\u8BDD\u56DE\u8C03\u7684\u64CD\u4F5C\u6309\u94AE\u884C\uFF0C\u5E76\u9644\u5E26 Spec Source \u67E5\u770B\u3002",
+    description: "\u81EA\u7531\u7EC4\u5408 13 \u7C7B\u7814\u53D1\u4EA4\u4E92\u79EF\u6728\uFF08table/callout/mermaid/steps/code/text/actions/tabs/metrics/diff/findings/plan/decision\uFF09\uFF0C\u652F\u6301\u884C\u5185\u6279\u6CE8\u3001\u6682\u5B58\u961F\u5217\u540C\u6B65\u81F3\u8F93\u5165\u6846 Context Pill \u4E0E\u4E00\u952E\u6C47\u603B\u53D1\u9001\u3002",
     inputSchema: UiCardInputShape,
     _meta: {
       ui: {
@@ -29167,10 +29872,10 @@ K3(
   },
   async (args) => {
     const normalized = normalizeUiCard(args);
-    latestPayload = normalized;
+    await storage.saveCard(normalized);
     return {
       content: [{ type: "text", text: buildUiCardSummary(normalized) }],
-      structuredContent: normalized
+      structuredContent: { ...normalized, surfaceHint: "inline" }
     };
   }
 );
@@ -29178,8 +29883,8 @@ K3(
   server,
   "open_walkthrough_pane",
   {
-    title: "\u6253\u5F00\u903B\u8F91\u8BB2\u89E3\u4FA7\u680F\u9762\u677F",
-    description: "\u5728\u4FA7\u680F\u6253\u5F00\u5361\u7247\u9762\u677F\uFF1B\u652F\u6301\u4F20\u5165\u7A7A\u5BF9\u8C61 {} \u4EE5\u5C55\u793A\u6700\u8FD1\u4E00\u6B21\u751F\u6210\u7684\u903B\u8F91\u5361\u7247/\u58F0\u660E\u5F0F\u4EA4\u4E92\u5361\u7247\u6216\u5185\u7F6E\u793A\u4F8B\u3002",
+    title: "\u6253\u5F00\u903B\u8F91\u8BB2\u89E3\u4FA7\u680F\u5DE5\u4F5C\u53F0",
+    description: "\u5728\u4FA7\u680F\u6253\u5F00\u65E0\u9AD8\u5EA6\u9650\u5236\u7684\u5361\u7247\u5DE5\u4F5C\u53F0\uFF1B\u4F20\u5165\u7A7A\u5BF9\u8C61 {} \u65F6\u81EA\u52A8\u52A0\u8F7D\u6700\u8FD1\u4E00\u5F20\u5386\u53F2\u5361\u7247\uFF0C\u5E76\u652F\u6301\u5207\u6362\u5386\u53F2\u8BB0\u5F55\u4E0E Mini Gallery \u793A\u4F8B\u3002",
     inputSchema: OptionalWalkthroughInputShape,
     _meta: {
       ui: {
@@ -29196,24 +29901,126 @@ K3(
     }
   },
   async (args) => {
-    const payload = args.title ? normalizeWalkthrough({
-      title: args.title,
-      subtitle: args.subtitle,
-      mermaid: args.mermaid,
-      steps: args.steps,
-      codeBlocks: args.codeBlocks,
-      notes: args.notes
-    }) : latestPayload ?? DEFAULT_DEMO_PAYLOAD;
+    let payload;
     if (args.title) {
-      latestPayload = payload;
+      payload = normalizeWalkthrough({
+        title: args.title,
+        subtitle: args.subtitle,
+        mermaid: args.mermaid,
+        nodeDetails: args.nodeDetails,
+        steps: args.steps,
+        codeBlocks: args.codeBlocks,
+        notes: args.notes,
+        commentable: args.commentable,
+        allowCustomInput: args.allowCustomInput
+      });
+      await storage.saveCard(payload);
+    } else {
+      payload = await storage.getLatestCard() ?? DEFAULT_DEMO_PAYLOAD;
     }
+    const history = await storage.listHistory();
+    const enriched = {
+      ...payload,
+      surfaceHint: "aux_pane",
+      history
+    };
     return {
       content: [{ type: "text", text: buildAnySummary(payload) }],
-      structuredContent: payload
+      structuredContent: enriched
+    };
+  }
+);
+K3(
+  server,
+  "app_list_history",
+  {
+    title: "\u5217\u51FA\u5386\u53F2\u5361\u7247\u4E0E\u7EC4\u4EF6\u793A\u4F8B",
+    description: "App-only: \u8FD4\u56DE\u6301\u4E45\u5316\u7684\u6700\u8FD1 30 \u5F20\u5361\u7247\u6458\u8981\u53CA\u5185\u7F6E Mini Gallery \u5217\u8868\u3002",
+    inputSchema: {},
+    _meta: {
+      ui: {
+        visibility: ["app"]
+      }
+    }
+  },
+  async () => {
+    const history = await storage.listHistory();
+    const gallery = MINI_GALLERY.map((item) => ({
+      id: item.id,
+      label: item.label,
+      description: item.description
+    }));
+    return {
+      content: [{ type: "text", text: `\u5386\u53F2\u5361\u7247 ${history.length} \u5F20\uFF0C\u5185\u7F6E\u793A\u4F8B ${gallery.length} \u4E2A\u3002` }],
+      structuredContent: {
+        persistent: storage.persistent,
+        history,
+        gallery
+      }
+    };
+  }
+);
+K3(
+  server,
+  "app_get_card",
+  {
+    title: "\u8BFB\u53D6\u5355\u5F20\u5386\u53F2\u5361\u7247\u6216\u793A\u4F8B\u5361\u7247",
+    description: "App-only: \u6309 cardId \u4ECE\u63D2\u4EF6\u6570\u636E\u76EE\u5F55\u6216\u5185\u7F6E Gallery \u52A0\u8F7D\u5B8C\u6574\u5361\u7247\u53CA\u8349\u7A3F\u3002",
+    inputSchema: AppGetCardInputShape,
+    _meta: {
+      ui: {
+        visibility: ["app"]
+      }
+    }
+  },
+  async (args) => {
+    const card = args.cardId.startsWith("gallery:") ? findGalleryPayload(args.cardId) : await storage.getCardById(args.cardId);
+    if (!card) {
+      return {
+        isError: true,
+        content: [{ type: "text", text: `\u672A\u627E\u5230\u5361\u7247\uFF1A${args.cardId}` }]
+      };
+    }
+    const history = await storage.listHistory();
+    return {
+      content: [{ type: "text", text: `\u5DF2\u52A0\u8F7D\u5361\u7247\uFF1A\u300C${card.title}\u300D` }],
+      structuredContent: {
+        ...card,
+        surfaceHint: "aux_pane",
+        history
+      }
+    };
+  }
+);
+K3(
+  server,
+  "app_save_draft",
+  {
+    title: "\u6301\u4E45\u5316\u5361\u7247\u6279\u6CE8\u8349\u7A3F",
+    description: "App-only: \u5728\u65E0 teardown \u901A\u77E5\u7684\u5BBF\u4E3B\u4E2D\u5B9E\u65F6\u4FDD\u5B58\u7528\u6237\u5728\u5361\u7247\u5185\u7684\u52FE\u9009\u3001\u6279\u6CE8\u4E0E\u8865\u5145\u8F93\u5165\u3002",
+    inputSchema: AppSaveDraftInputShape,
+    _meta: {
+      ui: {
+        visibility: ["app"]
+      }
+    }
+  },
+  async (args) => {
+    await storage.saveDraft({
+      cardId: args.cardId,
+      updatedAt: Date.now(),
+      queued: args.queued,
+      comments: args.comments,
+      customNote: args.customNote
+    });
+    return {
+      content: [{ type: "text", text: "\u8349\u7A3F\u5DF2\u4FDD\u5B58" }],
+      structuredContent: { ok: true, persistent: storage.persistent }
     };
   }
 );
 async function main() {
+  await storage.init();
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
@@ -29221,3 +30028,7 @@ main().catch((err) => {
   console.error("[visual-walkthrough] Fatal MCP server error:", err);
   process.exit(1);
 });
+export {
+  normalizeUiCard,
+  normalizeWalkthrough
+};
