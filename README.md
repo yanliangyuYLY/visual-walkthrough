@@ -1,8 +1,6 @@
 # Visual Walkthrough
 
-[![Visual Walkthrough 宣传视频](./assets/demo-poster.jpg)](./assets/visual-walkthrough-demo.mp4)
-
-> 🎬 [点击观看完整宣传视频（1080p · 含 BGM）](./assets/visual-walkthrough-demo.mp4)
+https://github.com/user-attachments/assets/3db7f3b1-1e63-4d5e-b499-07f3d4296465
 
 作者：`a` · 版本：`2.0.0` · 协议：[MIT License](./LICENSE)
 
