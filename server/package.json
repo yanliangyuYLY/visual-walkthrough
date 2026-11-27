@@ -1,0 +1,30 @@
+{
+  "name": "visual-walkthrough-server",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "author": "a",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build:ui": "vite build",
+    "build:server": "esbuild src/server.ts --bundle --platform=node --format=esm --target=node18 --banner:js=\"import { createRequire as __createRequire } from 'node:module'; const require = __createRequire(import.meta.url);\" --outfile=dist/server.mjs",
+    "build": "npm run build:ui && npm run build:server",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.7.5",
+    "@modelcontextprotocol/sdk": "^1.32.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "esbuild": "^0.25.0",
+    "mermaid": "^12.3.0",
+    "typescript": "^5.8.0",
+    "vite": "^6.2.0",
+    "vite-plugin-singlefile": "^2.3.4"
+  }
+}

@@ -1,0 +1,9 @@
+# Author: a
+# 仅忽略开发期依赖与系统临时文件；保留 server/dist/ 以保证下载即运行（零 node_modules 依赖）
+server/node_modules/
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+.env
+.env.*

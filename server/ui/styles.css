@@ -1,0 +1,823 @@
+/* Author: a */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--color-text-primary, #2c241e);
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+:root[data-theme="dark"] body {
+  color: var(--color-text-primary, #f2ebe5);
+}
+
+.vw-root {
+  width: 100%;
+  padding: 4px 0 8px;
+}
+
+.vw-card {
+  background: var(--color-background-primary, #faf7f2);
+  border: 1px solid var(--color-border-primary, #e4ddd2);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+:root[data-theme="dark"] .vw-card {
+  background: var(--color-background-primary, #1f1c19);
+  border-color: var(--color-border-primary, #3a332c);
+}
+
+.vw-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.vw-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--color-text-primary, #2c241e);
+}
+
+:root[data-theme="dark"] .vw-title {
+  color: var(--color-text-primary, #f5efe8);
+}
+
+.vw-subtitle {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--color-text-secondary, #6e6358);
+}
+
+:root[data-theme="dark"] .vw-subtitle {
+  color: var(--color-text-secondary, #a89d91);
+}
+
+/* Mermaid 面板 */
+.vw-mermaid-box {
+  background: var(--color-background-secondary, #f4efe6);
+  border: 1px solid var(--color-border-primary, #e4ddd2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+:root[data-theme="dark"] .vw-mermaid-box {
+  background: var(--color-background-secondary, #28231f);
+  border-color: var(--color-border-primary, #3a332c);
+}
+
+.vw-mermaid-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 4px;
+  gap: 8px;
+}
+
+.vw-mermaid-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary, #7b6f63);
+  letter-spacing: 0.02em;
+}
+
+.vw-toolbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--color-background-primary, #faf7f2);
+  border: 1px solid var(--color-border-primary, #dfd7cb);
+  border-radius: 8px;
+  padding: 2px 4px;
+}
+
+:root[data-theme="dark"] .vw-toolbar-actions {
+  background: var(--color-background-primary, #1f1c19);
+  border-color: var(--color-border-primary, #3e362f);
+}
+
+.vw-tool-btn {
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary, #62584e);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  line-height: 1.3;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.vw-tool-btn:hover {
+  background: rgba(200, 106, 43, 0.12);
+  color: #c86a2b;
+}
+
+.vw-tool-btn.is-active {
+  background: rgba(200, 106, 43, 0.16);
+  color: #c86a2b;
+}
+
+:root[data-theme="dark"] .vw-tool-btn {
+  color: var(--color-text-secondary, #b5aaa0);
+}
+
+.vw-mermaid-viewport {
+  position: relative;
+  overflow: hidden;
+  padding: 8px 12px 12px;
+  min-height: 110px;
+  max-height: 220px;
+  cursor: grab;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vw-mermaid-viewport.is-expanded {
+  max-height: 460px;
+}
+
+.vw-mermaid-viewport.is-dragging {
+  cursor: grabbing;
+}
+
+.vw-mermaid-stage {
+  transform-origin: center center;
+  transition: transform 0.08s ease-out;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.vw-mermaid-stage svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.vw-mermaid-source {
+  border-top: 1px solid var(--color-border-primary, #e4ddd2);
+  padding: 10px 12px;
+  background: var(--color-background-primary, #faf7f2);
+}
+
+:root[data-theme="dark"] .vw-mermaid-source {
+  border-color: var(--color-border-primary, #3a332c);
+  background: var(--color-background-primary, #191613);
+}
+
+.vw-mermaid-source pre {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-x: auto;
+  color: var(--color-text-primary, #3b3129);
+}
+
+:root[data-theme="dark"] .vw-mermaid-source pre {
+  color: var(--color-text-primary, #e6ddd4);
+}
+
+/* 步骤列表 */
+.vw-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vw-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.vw-step-badge {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-border-primary, #d6cdc0);
+  background: var(--color-background-primary, #ffffff);
+  color: var(--color-text-secondary, #6e6256);
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:root[data-theme="dark"] .vw-step-badge {
+  background: var(--color-background-secondary, #2a241f);
+  border-color: var(--color-border-primary, #4b4138);
+  color: var(--color-text-secondary, #cbbeb0);
+}
+
+.vw-step-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.vw-step-title {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--color-text-primary, #2c241e);
+  margin: 0 0 2px;
+}
+
+:root[data-theme="dark"] .vw-step-title {
+  color: var(--color-text-primary, #f3ede6);
+}
+
+.vw-step-desc {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--color-text-secondary, #5a4f45);
+  word-break: break-word;
+}
+
+:root[data-theme="dark"] .vw-step-desc {
+  color: var(--color-text-secondary, #c2b6aa);
+}
+
+.vw-inline-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: rgba(200, 106, 43, 0.12);
+  color: #b5541a;
+}
+
+:root[data-theme="dark"] .vw-inline-code {
+  background: rgba(235, 138, 72, 0.16);
+  color: #f0a169;
+}
+
+.vw-file-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  color: #b5541a;
+  background: transparent;
+  border: none;
+  padding: 0 2px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(181, 84, 26, 0.4);
+  text-underline-offset: 2px;
+}
+
+.vw-file-link:hover {
+  text-decoration-color: currentColor;
+}
+
+:root[data-theme="dark"] .vw-file-link {
+  color: #f0a169;
+}
+
+.vw-file-static {
+  margin-left: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  color: var(--color-text-secondary, #7c6f63);
+}
+
+/* 可折叠代码块 */
+.vw-code-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vw-code-card {
+  border: 1px solid var(--color-border-primary, #e2dad0);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--color-background-secondary, #f5f1ea);
+}
+
+:root[data-theme="dark"] .vw-code-card {
+  border-color: var(--color-border-primary, #3c342d);
+  background: var(--color-background-secondary, #26211d);
+}
+
+.vw-code-summary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--color-text-primary, #2c241e);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+:root[data-theme="dark"] .vw-code-summary {
+  color: var(--color-text-primary, #f0e8df);
+}
+
+.vw-code-chevron {
+  font-size: 11px;
+  color: var(--color-text-secondary, #7c6f63);
+  transition: transform 0.15s ease;
+}
+
+.vw-code-card.is-open .vw-code-chevron {
+  transform: rotate(180deg);
+}
+
+.vw-code-body {
+  display: none;
+  border-top: 1px solid var(--color-border-primary, #e2dad0);
+  background: var(--color-background-primary, #fdfbf7);
+}
+
+.vw-code-card.is-open .vw-code-body {
+  display: block;
+}
+
+:root[data-theme="dark"] .vw-code-body {
+  border-color: var(--color-border-primary, #3c342d);
+  background: var(--color-background-primary, #191614);
+}
+
+.vw-code-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--color-border-primary, #ece5db);
+  font-size: 12px;
+}
+
+:root[data-theme="dark"] .vw-code-meta {
+  border-color: var(--color-border-primary, #2f2924);
+}
+
+.vw-code-path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  color: #b5541a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="dark"] .vw-code-path {
+  color: #f0a169;
+}
+
+.vw-code-scroll {
+  overflow-x: auto;
+  padding: 8px 0;
+}
+
+.vw-code-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.vw-code-ln {
+  width: 1%;
+  min-width: 42px;
+  padding: 0 10px 0 14px;
+  text-align: right;
+  user-select: none;
+  color: var(--color-text-tertiary, #9b8f82);
+  vertical-align: top;
+}
+
+.vw-code-line {
+  padding: 0 14px 0 4px;
+  white-space: pre;
+  color: var(--color-text-primary, #2c241e);
+}
+
+:root[data-theme="dark"] .vw-code-line {
+  color: var(--color-text-primary, #eae1d7);
+}
+
+/* 提示备注 */
+.vw-notes {
+  border-top: 1px dashed var(--color-border-primary, #dfd7cb);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--color-text-secondary, #6e6256);
+}
+
+.vw-empty,
+.vw-toast {
+  font-size: 13px;
+  color: var(--color-text-secondary, #6e6256);
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--color-background-secondary, #f4efe6);
+  border: 1px solid var(--color-border-primary, #e4ddd2);
+}
+
+:root[data-theme="dark"] .vw-empty,
+:root[data-theme="dark"] .vw-toast {
+  color: var(--color-text-secondary, #b7aca0);
+  background: var(--color-background-secondary, #26211d);
+  border-color: var(--color-border-primary, #3a332c);
+}
+
+.vw-toast {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  padding: 6px 12px;
+  font-size: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 20;
+}
+
+.vw-error-box {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--color-text-danger, #b42318);
+  background: var(--color-background-danger, #fef3f2);
+  border-top: 1px solid var(--color-border-danger, #fecdca);
+}
+
+
+/* 声明式组件表格与徽章 */
+.vw-table-wrap {
+  border: 1px solid var(--color-border-primary, #e4ddd2);
+  border-radius: 10px;
+  overflow-x: auto;
+  background: var(--color-background-primary, #faf7f2);
+}
+
+:root[data-theme="dark"] .vw-table-wrap {
+  border-color: var(--color-border-primary, #3a332c);
+  background: var(--color-background-primary, #1b1815);
+}
+
+.vw-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.vw-table thead th {
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary, #6e6358);
+  background: var(--color-background-secondary, #f2ede4);
+  border-bottom: 1px solid var(--color-border-primary, #e4ddd2);
+  white-space: nowrap;
+}
+
+:root[data-theme="dark"] .vw-table thead th {
+  color: var(--color-text-secondary, #b2a699);
+  background: var(--color-background-secondary, #27221d);
+  border-color: var(--color-border-primary, #3a332c);
+}
+
+.vw-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border-primary, #ebe4d9);
+  color: var(--color-text-primary, #2c241e);
+  vertical-align: middle;
+}
+
+.vw-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+:root[data-theme="dark"] .vw-table tbody td {
+  border-color: var(--color-border-primary, #322c26);
+  color: var(--color-text-primary, #ece4dc);
+}
+
+.vw-cell {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.vw-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.vw-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.vw-badge-good {
+  color: #166534;
+  background: rgba(22, 163, 74, 0.1);
+  border-color: rgba(22, 163, 74, 0.35);
+}
+
+.vw-badge-warn {
+  color: #9a5b13;
+  background: rgba(217, 119, 6, 0.1);
+  border-color: rgba(217, 119, 6, 0.38);
+}
+
+.vw-badge-bad {
+  color: #b42318;
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.35);
+}
+
+.vw-badge-info {
+  color: #b5541a;
+  background: rgba(200, 106, 43, 0.1);
+  border-color: rgba(200, 106, 43, 0.35);
+}
+
+.vw-badge-neutral {
+  color: var(--color-text-secondary, #6e6358);
+  background: var(--color-background-secondary, #f2ede4);
+  border-color: var(--color-border-primary, #dcd4c8);
+}
+
+:root[data-theme="dark"] .vw-badge-good {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(110, 231, 183, 0.35);
+}
+
+:root[data-theme="dark"] .vw-badge-warn {
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(252, 211, 77, 0.35);
+}
+
+:root[data-theme="dark"] .vw-badge-bad {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(252, 165, 165, 0.35);
+}
+
+:root[data-theme="dark"] .vw-badge-info {
+  color: #f0a169;
+  background: rgba(235, 138, 72, 0.16);
+  border-color: rgba(240, 161, 105, 0.35);
+}
+
+/* Callout 提示框 */
+.vw-callout {
+  border: 1px solid var(--color-border-primary, #e4ddd2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--color-background-secondary, #f4efe6);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+:root[data-theme="dark"] .vw-callout {
+  border-color: var(--color-border-primary, #3a332c);
+  background: var(--color-background-secondary, #26211d);
+}
+
+.vw-callout-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--color-text-primary, #2c241e);
+}
+
+:root[data-theme="dark"] .vw-callout-title {
+  color: var(--color-text-primary, #f3ede6);
+}
+
+.vw-callout-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1.5px solid currentColor;
+  flex-shrink: 0;
+}
+
+.vw-callout-good .vw-callout-icon {
+  color: #16a34a;
+}
+
+.vw-callout-info .vw-callout-icon {
+  color: #c86a2b;
+}
+
+.vw-callout-warn .vw-callout-icon {
+  color: #d97706;
+}
+
+.vw-callout-bad .vw-callout-icon {
+  color: #dc2626;
+}
+
+.vw-callout-body {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--color-text-secondary, #52473d);
+}
+
+:root[data-theme="dark"] .vw-callout-body {
+  color: var(--color-text-secondary, #c6bab0);
+}
+
+/* 操作按钮行 */
+.vw-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+.vw-action-btn {
+  border-radius: 9px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: opacity 0.15s ease, background-color 0.15s ease, transform 0.08s ease;
+}
+
+.vw-action-btn:active {
+  transform: translateY(1px);
+}
+
+.vw-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.vw-action-primary {
+  background: #c85a17;
+  color: #ffffff;
+  border-color: #c85a17;
+}
+
+.vw-action-primary:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.vw-action-secondary {
+  background: var(--color-background-secondary, #efe9de);
+  color: var(--color-text-primary, #352b22);
+  border-color: var(--color-border-primary, #dcd3c6);
+}
+
+.vw-action-secondary:hover:not(:disabled) {
+  background: var(--color-background-tertiary, #e6dfd2);
+}
+
+:root[data-theme="dark"] .vw-action-secondary {
+  background: var(--color-background-secondary, #2d2722);
+  color: var(--color-text-primary, #ece4dc);
+  border-color: var(--color-border-primary, #453c34);
+}
+
+.vw-action-danger {
+  background: #b42318;
+  color: #ffffff;
+  border-color: #b42318;
+}
+
+/* 底部 <> Source 切换与源码面板 */
+.vw-source-wrap {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vw-source-bar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.vw-source-toggle {
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary, #7b6f63);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.vw-source-toggle:hover {
+  color: var(--color-text-primary, #2c241e);
+  background: var(--color-background-secondary, #f2ede4);
+}
+
+:root[data-theme="dark"] .vw-source-toggle {
+  color: var(--color-text-secondary, #a89d91);
+}
+
+:root[data-theme="dark"] .vw-source-toggle:hover {
+  color: var(--color-text-primary, #f2ebe5);
+  background: var(--color-background-secondary, #2a241f);
+}
+
+.vw-source-panel {
+  border: 1px solid var(--color-border-primary, #e4ddd2);
+  border-radius: 10px;
+  background: var(--color-background-secondary, #f5f1ea);
+  overflow: hidden;
+}
+
+:root[data-theme="dark"] .vw-source-panel {
+  border-color: var(--color-border-primary, #3a332c);
+  background: var(--color-background-secondary, #231f1b);
+}
+
+.vw-source-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--color-border-primary, #e4ddd2);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary, #7b6f63);
+}
+
+:root[data-theme="dark"] .vw-source-head {
+  border-color: var(--color-border-primary, #3a332c);
+  color: var(--color-text-secondary, #a89d91);
+}
+
+.vw-source-pre {
+  margin: 0;
+  padding: 10px 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  overflow-x: auto;
+  color: var(--color-text-primary, #2c241e);
+}
+
+:root[data-theme="dark"] .vw-source-pre {
+  color: var(--color-text-primary, #ebe3da);
+}

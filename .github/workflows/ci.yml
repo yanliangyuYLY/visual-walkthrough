@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Typecheck and build self-contained bundles
+        working-directory: server
+        run: |
+          npm run typecheck
+          npm run build
+
+      - name: Audit CSP zero external links and bundle size
+        working-directory: server
+        run: |
+          SIZE=$(wc -c < dist/ui/index.html)
+          echo "dist/ui/index.html bytes: $SIZE"
+          test "$SIZE" -lt 10485760
+          ! grep -Eo '<script[^>]+src=|<link[^>]+href="https?://' dist/ui/index.html
+
+      - name: Verify MCP server runs without node_modules
+        run: |
+          TMP_DIR=$(mktemp -d)
+          cp -R . "$TMP_DIR/plugin"
+          rm -rf "$TMP_DIR/plugin/server/node_modules"
+          node --input-type=module -e '
+            import { spawn } from "node:child_process";
+            const child = spawn("node", ["'"$TMP_DIR"'/plugin/server/dist/server.mjs"], { stdio: ["pipe", "pipe", "inherit"] });
+            let buf = "";
+            const responses = new Map();
+            child.stdout.on("data", (chunk) => {
+              buf += chunk.toString();
+              const lines = buf.split("\n");
+              buf = lines.pop() ?? "";
+              for (const line of lines) {
+                if (!line.trim()) continue;
+                const msg = JSON.parse(line);
+                if (msg.id) responses.set(msg.id, msg);
+              }
+            });
+            const send = (obj) => child.stdin.write(JSON.stringify(obj) + "\n");
+            const waitId = (id) => new Promise((resolve, reject) => {
+              const timer = setTimeout(() => reject(new Error("Timeout waiting id=" + id)), 5000);
+              const poll = setInterval(() => {
+                if (responses.has(id)) {
+                  clearTimeout(timer);
+                  clearInterval(poll);
+                  resolve(responses.get(id));
+                }
+              }, 20);
+            });
+            send({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2024-11-05", capabilities: {}, clientInfo: { name: "ci", version: "1.0.0" } } });
+            const initRes = await waitId(1);
+            if (!initRes.result?.capabilities?.tools || !initRes.result?.capabilities?.resources) {
+              throw new Error("Missing capabilities");
+            }
+            send({ jsonrpc: "2.0", method: "notifications/initialized" });
+            send({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} });
+            const toolsRes = await waitId(2);
+            const names = (toolsRes.result?.tools || []).map((t) => t.name);
+            console.log("Tools:", names);
+            if (!names.includes("render_ui_card") || !names.includes("render_logic_walkthrough") || !names.includes("open_walkthrough_pane")) {
+              throw new Error("Unexpected tools: " + JSON.stringify(names));
+            }
+            child.kill();
+          '
+          rm -rf "$TMP_DIR"
